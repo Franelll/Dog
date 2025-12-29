@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: psiarze-backend
+    env: python
+    plan: free
+    branch: main
+    rootDir: psiarze-backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DATABASE_URL
+        fromDatabase:
+          name: psiarze-db
+          property: connectionString
+
+databases:
+  - name: psiarze-db
+    plan: free
+    databaseName: psiarze
+    user: psiarze
