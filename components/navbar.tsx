@@ -16,12 +16,25 @@ import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/d
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { DogIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 export const Navbar = () => {
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  const userInitial = user?.username?.[0]?.toUpperCase() || "?";
+  const displayName = user?.username || "Gość";
+
   return (
     <HeroUINavbar 
       maxWidth="xl" 
@@ -66,62 +79,79 @@ export const Navbar = () => {
         <NavbarItem className="hidden sm:flex gap-3 items-center">
           <ThemeSwitch />
           
-          {/* Profile Dropdown */}
-          <Dropdown placement="bottom-end">
-            <DropdownTrigger>
-              <Avatar
-                as="button"
-                className="transition-transform hover:scale-105 bg-gradient-to-br from-amber-400 to-orange-500 text-white cursor-pointer"
-                name="J"
-                size="sm"
-              />
-            </DropdownTrigger>
+          {isAuthenticated ? (
+            /* Profile Dropdown */
+            <Dropdown placement="bottom-end">
+              <DropdownTrigger>
+                <Avatar
+                  as="button"
+                  className="transition-transform hover:scale-105 bg-gradient-to-br from-amber-400 to-orange-500 text-white cursor-pointer"
+                  name={userInitial}
+                  size="sm"
+                />
+              </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
                 <DropdownItem key="profile" className="h-14 gap-2">
                   <p className="font-semibold">Zalogowany jako</p>
-                  <p className="font-semibold text-primary">Jan Kowalski</p>
+                  <p className="font-semibold text-primary">{displayName}</p>
                 </DropdownItem>
-              <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
-                🐕 Mój profil
-              </DropdownItem>
-              <DropdownItem key="settings" as={NextLink} href="/ustawienia" textValue="Ustawienia">
-                ⚙️ Ustawienia
-              </DropdownItem>
-              <DropdownItem key="help" textValue="Pomoc">
-                ❓ Pomoc
-              </DropdownItem>
-              <DropdownItem key="logout" color="danger" textValue="Wyloguj">
-                🚪 Wyloguj się
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
+                <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+                  🐕 Mój profil
+                </DropdownItem>
+                <DropdownItem key="settings" as={NextLink} href="/ustawienia" textValue="Ustawienia">
+                  ⚙️ Ustawienia
+                </DropdownItem>
+                <DropdownItem key="help" textValue="Pomoc">
+                  ❓ Pomoc
+                </DropdownItem>
+                <DropdownItem key="logout" color="danger" textValue="Wyloguj" onPress={handleLogout}>
+                  🚪 Wyloguj się
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <div className="flex gap-2">
+              <Button as={NextLink} href="/login" variant="flat" size="sm">
+                Zaloguj
+              </Button>
+              <Button as={NextLink} href="/rejestracja" color="primary" size="sm">
+                Rejestracja
+              </Button>
+            </div>
+          )}
         </NavbarItem>
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
         <ThemeSwitch />
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Avatar
-              as="button"
-              className="transition-transform bg-gradient-to-br from-amber-400 to-orange-500 text-white"
-              name="J"
-              size="sm"
-            />
-          </DropdownTrigger>
-          <DropdownMenu aria-label="Profile Actions" variant="flat">
-            <DropdownItem key="profile" className="h-14 gap-2" textValue="Signed in as Jan">
-              <p className="font-semibold">Zalogowany jako</p>
-              <p className="font-semibold text-primary">Jan Kowalski</p>
-            </DropdownItem>
-            <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
-              🐕 Mój profil
-            </DropdownItem>
-            <DropdownItem key="logout" color="danger" textValue="Wyloguj">
-              🚪 Wyloguj się
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+        {isAuthenticated ? (
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Avatar
+                as="button"
+                className="transition-transform bg-gradient-to-br from-amber-400 to-orange-500 text-white"
+                name={userInitial}
+                size="sm"
+              />
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Profile Actions" variant="flat">
+              <DropdownItem key="profile" className="h-14 gap-2" textValue={`Signed in as ${displayName}`}>
+                <p className="font-semibold">Zalogowany jako</p>
+                <p className="font-semibold text-primary">{displayName}</p>
+              </DropdownItem>
+              <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+                🐕 Mój profil
+              </DropdownItem>
+              <DropdownItem key="logout" color="danger" textValue="Wyloguj" onPress={handleLogout}>
+                🚪 Wyloguj się
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        ) : (
+          <Button as={NextLink} href="/login" variant="flat" size="sm">
+            Zaloguj
+          </Button>
+        )}
         <NavbarMenuToggle />
       </NavbarContent>
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
 
 const DEFAULT_API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "https://psiarze-backend.onrender.com/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://psiarze-backend.onrender.com/api";
 
 export default function TestConnectionPage() {
   const [status, setStatus] = useState<string>("Sprawdzanie połączenia...");
@@ -104,6 +104,9 @@ export default function TestConnectionPage() {
         <h2 className="text-xl font-semibold mb-2">Konfiguracja:</h2>
         <p className="text-gray-600">
           API URL: <code className="bg-gray-100 px-2 py-1 rounded">{manualUrl}</code>
+        </p>
+        <p className="text-gray-500 text-xs mt-1">
+          Raw Env: {process.env.NEXT_PUBLIC_API_URL ? `"${process.env.NEXT_PUBLIC_API_URL}"` : "(undefined/empty)"}
         </p>
       </div>
     </div>

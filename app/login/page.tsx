@@ -11,46 +11,42 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 import { DogIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    router.push("/czaty");
+    return null;
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!email || !password) {
+      setError("Wprowadź email i hasło");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Demo login - in real app this would call an API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    if (email === "demo@psiarze.pl" && password === "demo123") {
-      // Save login state
-      localStorage.setItem("psiarze_user", JSON.stringify({
-        name: "Jan Kowalski",
-        email: email,
-        avatar: "J",
-        dog: { name: "Reksio", breed: "Golden Retriever" }
-      }));
+    try {
+      await login(email, password);
       router.push("/czaty");
-    } else if (email && password) {
-      // Accept any credentials for demo
-      localStorage.setItem("psiarze_user", JSON.stringify({
-        name: email.split("@")[0],
-        email: email,
-        avatar: email[0].toUpperCase(),
-        dog: { name: "Pies", breed: "Mieszaniec" }
-      }));
-      router.push("/czaty");
-    } else {
-      setError("Wprowadź email i hasło");
+    } catch (err: any) {
+      setError(err.message || "Błąd logowania. Sprawdź dane.");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -153,12 +149,6 @@ export default function LoginPage() {
                 Zarejestruj się
               </Link>
             </p>
-
-            {/* Demo credentials */}
-            <div className="mt-4 p-3 rounded-lg bg-default-100 text-center">
-              <p className="text-xs text-default-500 mb-1">Demo konto:</p>
-              <p className="text-xs font-mono text-default-600">demo@psiarze.pl / demo123</p>
-            </div>
           </CardBody>
         </Card>
       </motion.div>

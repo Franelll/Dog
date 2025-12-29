@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -8,8 +8,11 @@ import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
-import { SendIcon, DogIcon } from "@/components/icons";
+import { SendIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
+import { chatsApi } from "@/lib/api-services";
 
 type Message = {
   id: string;
@@ -30,72 +33,140 @@ type ChatRoom = {
   members: number;
 };
 
-const CHAT_ROOMS: ChatRoom[] = [
-  { id: "1", name: "Psiarze Mokotów", icon: "🏘️", lastMessage: "Kto na spacer?", time: "14:30", unread: 3, members: 12 },
-  { id: "2", name: "Park Skaryszewski", icon: "🌳", lastMessage: "Świetna pogoda!", time: "13:15", unread: 0, members: 8 },
-  { id: "3", name: "Psy na Ursynowie", icon: "🐕", lastMessage: "Polecam weterynarza", time: "12:00", unread: 1, members: 15 },
-];
-
-// Osobne wiadomości dla każdej grupy
-const MESSAGES_BY_ROOM: Record<string, Message[]> = {
-  "1": [
-    { id: "1", from: "Kasia", text: "Hej, kto dzisiaj na spacer? ☀️", time: "14:30", type: "chat", avatar: "K" },
-    { id: "2", from: "Ania", text: "Za 15 min w parku! 🐕", time: "14:35", type: "status", avatar: "A" },
-    { id: "3", from: "Marcin", text: "Super, też wychodzę z Luną!", time: "14:36", type: "chat", avatar: "M" },
-    { id: "4", from: "Tomek", text: "Czekajcie na mnie! 🏃", time: "14:38", type: "chat", avatar: "T" },
-  ],
-  "2": [
-    { id: "5", from: "Piotr", text: "Piękna pogoda dzisiaj! 🌞", time: "13:00", type: "chat", avatar: "P" },
-    { id: "6", from: "Magda", text: "Bella uwielbia ten park!", time: "13:10", type: "chat", avatar: "M" },
-    { id: "7", from: "Kasia", text: "Może spotkanie o 15:00?", time: "13:15", type: "chat", avatar: "K" },
-  ],
-  "3": [
-    { id: "8", from: "Anna", text: "Zna ktoś dobrego weterynarza?", time: "11:45", type: "chat", avatar: "A" },
-    { id: "9", from: "Tomek", text: "Polecam klinikę na Dereniowej", time: "11:50", type: "chat", avatar: "T" },
-    { id: "10", from: "Marcin", text: "Dr Nowak jest świetny!", time: "12:00", type: "chat", avatar: "M" },
-  ],
-};
-
 export default function CzatyPage() {
-  const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(CHAT_ROOMS[0]);
-  const [messagesByRoom, setMessagesByRoom] = useState<Record<string, Message[]>>(MESSAGES_BY_ROOM);
+  const router = useRouter();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  
+  const [rooms, setRooms] = useState<ChatRoom[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
+  const [messagesByRoom, setMessagesByRoom] = useState<Record<string, Message[]>>({});
   const [newMessage, setNewMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   
   const currentMessages = selectedRoom ? messagesByRoom[selectedRoom.id] || [] : [];
 
-  const sendMessage = () => {
-    if (!newMessage.trim() || !selectedRoom) return;
-    const msg: Message = {
-      id: Date.now().toString(),
-      from: "Ty",
-      text: newMessage,
-      time: new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
-      type: "chat",
-      avatar: "J",
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  // Fetch chat rooms
+  useEffect(() => {
+    const fetchRooms = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const data = await chatsApi.getRooms();
+        const mappedRooms: ChatRoom[] = data.map((room: { id: number; name: string }) => ({
+          id: room.id.toString(),
+          name: room.name,
+          icon: "💬",
+          lastMessage: "",
+          time: "",
+          unread: 0,
+          members: 2,
+        }));
+        setRooms(mappedRooms);
+        if (mappedRooms.length > 0) {
+          setSelectedRoom(mappedRooms[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch rooms:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-    setMessagesByRoom({
-      ...messagesByRoom,
-      [selectedRoom.id]: [...(messagesByRoom[selectedRoom.id] || []), msg],
-    });
-    setNewMessage("");
+
+    if (isAuthenticated) {
+      fetchRooms();
+    }
+  }, [isAuthenticated]);
+
+  // Fetch messages for selected room
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!selectedRoom) return;
+      
+      try {
+        const data = await chatsApi.getMessages(parseInt(selectedRoom.id));
+        const mappedMessages: Message[] = data.map((msg: { id: number; content: string; sender_id: number; created_at: string }) => ({
+          id: msg.id.toString(),
+          from: `User ${msg.sender_id}`,
+          text: msg.content,
+          time: new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+          type: "chat" as const,
+          avatar: "U",
+        }));
+        setMessagesByRoom(prev => ({
+          ...prev,
+          [selectedRoom.id]: mappedMessages,
+        }));
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedRoom]);
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedRoom) return;
+    
+    try {
+      await chatsApi.sendMessage(parseInt(selectedRoom.id), newMessage);
+      
+      const msg: Message = {
+        id: Date.now().toString(),
+        from: "Ty",
+        text: newMessage,
+        time: new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        type: "chat",
+        avatar: "J",
+      };
+      setMessagesByRoom(prev => ({
+        ...prev,
+        [selectedRoom.id]: [...(prev[selectedRoom.id] || []), msg],
+      }));
+      setNewMessage("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
 
-  const announceWalk = (minutes: number) => {
-    if (!selectedRoom) return; // Tylko gdy jest wybrana grupa
+  const announceWalk = async (minutes: number) => {
+    if (!selectedRoom) return;
     
-    const msg: Message = {
-      id: Date.now().toString(),
-      from: "Ty",
-      text: `Za ${minutes} min będę w parku! 🐕‍🦺`,
-      time: new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
-      type: "status",
-      avatar: "J",
-    };
-    setMessagesByRoom({
-      ...messagesByRoom,
-      [selectedRoom.id]: [...(messagesByRoom[selectedRoom.id] || []), msg],
-    });
+    const text = `Za ${minutes} min będę w parku! 🐕‍🦺`;
+    
+    try {
+      await chatsApi.sendMessage(parseInt(selectedRoom.id), text);
+      
+      const msg: Message = {
+        id: Date.now().toString(),
+        from: "Ty",
+        text,
+        time: new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+        type: "status",
+        avatar: "J",
+      };
+      setMessagesByRoom(prev => ({
+        ...prev,
+        [selectedRoom.id]: [...(prev[selectedRoom.id] || []), msg],
+      }));
+    } catch (error) {
+      console.error("Failed to announce walk:", error);
+    }
   };
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 pb-8">
@@ -161,38 +232,48 @@ export default function CzatyPage() {
             </CardHeader>
             <Divider />
             <CardBody className="p-2">
-              <div className="flex flex-col gap-1">
-                {CHAT_ROOMS.map((room) => (
-                  <motion.div
-                    key={room.id}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                  >
-                    <Button
-                      variant={selectedRoom?.id === room.id ? "flat" : "light"}
-                      color={selectedRoom?.id === room.id ? "primary" : "default"}
-                      className="w-full h-auto py-3 justify-start"
-                      onPress={() => setSelectedRoom(room)}
+              {rooms.length === 0 ? (
+                <div className="text-center py-8">
+                  <span className="text-4xl block mb-2">💬</span>
+                  <p className="text-default-500 text-sm">Brak aktywnych czatów</p>
+                  <p className="text-default-400 text-xs">Dodaj znajomych, aby rozpocząć rozmowę</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {rooms.map((room) => (
+                    <motion.div
+                      key={room.id}
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
                     >
-                      <div className="flex items-center gap-3 w-full">
-                        <span className="text-2xl">{room.icon}</span>
-                        <div className="flex-1 text-left">
-                          <div className="flex items-center justify-between">
-                            <p className="font-semibold text-sm">{room.name}</p>
-                            <span className="text-xs text-default-400">{room.time}</span>
+                      <Button
+                        variant={selectedRoom?.id === room.id ? "flat" : "light"}
+                        color={selectedRoom?.id === room.id ? "primary" : "default"}
+                        className="w-full h-auto py-3 justify-start"
+                        onPress={() => setSelectedRoom(room)}
+                      >
+                        <div className="flex items-center gap-3 w-full">
+                          <span className="text-2xl">{room.icon}</span>
+                          <div className="flex-1 text-left">
+                            <div className="flex items-center justify-between">
+                              <p className="font-semibold text-sm">{room.name}</p>
+                              {room.time && <span className="text-xs text-default-400">{room.time}</span>}
+                            </div>
+                            {room.lastMessage && (
+                              <p className="text-xs text-default-500 truncate">{room.lastMessage}</p>
+                            )}
                           </div>
-                          <p className="text-xs text-default-500 truncate">{room.lastMessage}</p>
+                          {room.unread > 0 && (
+                            <Chip size="sm" color="primary" variant="solid" className="min-w-6 h-6">
+                              {room.unread}
+                            </Chip>
+                          )}
                         </div>
-                        {room.unread > 0 && (
-                          <Chip size="sm" color="primary" variant="solid" className="min-w-6 h-6">
-                            {room.unread}
-                          </Chip>
-                        )}
-                      </div>
-                    </Button>
-                  </motion.div>
-                ))}
-              </div>
+                      </Button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </CardBody>
           </Card>
         </motion.div>

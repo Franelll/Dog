@@ -11,15 +11,17 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 import { DogIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 export default function RejeestracjaPage() {
   const router = useRouter();
+  const { register, addDog, isAuthenticated } = useAuth();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   // User data
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,13 +30,18 @@ export default function RejeestracjaPage() {
   // Dog data
   const [dogName, setDogName] = useState("");
   const [dogBreed, setDogBreed] = useState("");
-  const [dogAge, setDogAge] = useState("");
+
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    router.push("/czaty");
+    return null;
+  }
 
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!name || !email || !password) {
+    if (!username || !email || !password) {
       setError("Wypełnij wszystkie pola");
       return;
     }
@@ -59,23 +66,21 @@ export default function RejeestracjaPage() {
     setError("");
     setIsLoading(true);
 
-    // Demo registration
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Register user with backend
+      await register(email, username, password);
 
-    // Save user data
-    localStorage.setItem("psiarze_user", JSON.stringify({
-      name: name,
-      email: email,
-      avatar: name[0].toUpperCase(),
-      dog: {
-        name: dogName || "Pies",
-        breed: dogBreed || "Mieszaniec",
-        age: dogAge || 2
+      // Add dog if provided
+      if (dogName) {
+        await addDog(dogName, dogBreed || "Mieszaniec");
       }
-    }));
 
-    setIsLoading(false);
-    router.push("/czaty");
+      router.push("/czaty");
+    } catch (err: any) {
+      setError(err.message || "Błąd rejestracji. Spróbuj ponownie.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -119,10 +124,10 @@ export default function RejeestracjaPage() {
             {step === 1 ? (
               <form onSubmit={handleStep1} className="flex flex-col gap-4">
                 <Input
-                  label="Imię i nazwisko"
-                  placeholder="Jan Kowalski"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  label="Nazwa użytkownika"
+                  placeholder="jan_kowalski"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   variant="bordered"
                   startContent={<span className="text-default-400">👤</span>}
                   isRequired
@@ -210,15 +215,7 @@ export default function RejeestracjaPage() {
                   startContent={<span className="text-default-400">🦮</span>}
                 />
 
-                <Input
-                  type="number"
-                  label="Wiek (lata)"
-                  placeholder="np. 3"
-                  value={dogAge}
-                  onChange={(e) => setDogAge(e.target.value)}
-                  variant="bordered"
-                  startContent={<span className="text-default-400">📅</span>}
-                />
+
 
                 <div className="flex gap-3 mt-2">
                   <Button

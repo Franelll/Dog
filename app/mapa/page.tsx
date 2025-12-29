@@ -11,6 +11,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
 import { MapPinIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
+import { locationsApi } from "@/lib/api-services";
 
 // Dynamic import for Leaflet map (client-side only)
 const LeafletMap = dynamic(() => import("@/components/leaflet-map"), {
@@ -37,30 +39,42 @@ type Friend = {
   lng: number;
 };
 
-const DEMO_FRIENDS: Friend[] = [
-  { id: "1", name: "Kasia", dog: "Burek", breed: "Labrador", avatar: "K", status: null, color: "bg-pink-500", lat: 52.235, lng: 21.025 },
-  { id: "2", name: "Marcin", dog: "Luna", breed: "Golden Retriever", avatar: "M", status: "Na spacerze", color: "bg-blue-500", lat: 52.228, lng: 21.015 },
-  { id: "3", name: "Ania", dog: "Max", breed: "Beagle", avatar: "A", status: "Za 15 min w parku!", color: "bg-purple-500", lat: 52.232, lng: 21.008 },
-  { id: "4", name: "Tomek", dog: "Rocky", breed: "Husky", avatar: "T", status: null, color: "bg-emerald-500", lat: 52.24, lng: 21.02 },
-  { id: "5", name: "Magda", dog: "Bella", breed: "Corgi", avatar: "M", status: null, color: "bg-rose-500", lat: 52.225, lng: 21.03 },
-  { id: "6", name: "Piotr", dog: "Charlie", breed: "Border Collie", avatar: "P", status: "Szukam towarzystwa!", color: "bg-cyan-500", lat: 52.238, lng: 21.005 },
+const COLORS = [
+  "bg-pink-500",
+  "bg-blue-500",
+  "bg-purple-500",
+  "bg-emerald-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+  "bg-amber-500",
+  "bg-indigo-500",
 ];
 
 const PARKS = [
-  { id: "1", name: "Park Skaryszewski", emoji: "🌳", friends: 3, lat: 52.236, lng: 21.055 },
-  { id: "2", name: "Park Łazienkowski", emoji: "🏛️", friends: 1, lat: 52.215, lng: 21.035 },
-  { id: "3", name: "Park Mokotowski", emoji: "🌲", friends: 2, lat: 52.205, lng: 21.005 },
+  { id: "1", name: "Park Skaryszewski", emoji: "🌳", friends: 0, lat: 52.236, lng: 21.055 },
+  { id: "2", name: "Park Łazienkowski", emoji: "🏛️", friends: 0, lat: 52.215, lng: 21.035 },
+  { id: "3", name: "Park Mokotowski", emoji: "🌲", friends: 0, lat: 52.205, lng: 21.005 },
 ];
 
 function MapaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const friendIdFromUrl = searchParams.get("friend");
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  const [friends] = useState<Friend[]>(DEMO_FRIENDS);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 52.2297, lng: 21.0122 });
+  const [loading, setLoading] = useState(true);
+  const [sharingLocation, setSharingLocation] = useState(false);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   // Get user location
   useEffect(() => {
@@ -78,6 +92,37 @@ function MapaPageContent() {
       );
     }
   }, []);
+
+  // Fetch friend locations
+  useEffect(() => {
+    const fetchLocations = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const data = await locationsApi.getFriendsLocations();
+        const mappedFriends: Friend[] = data.map((loc: { user_id: number; username: string; latitude: number; longitude: number; is_active: boolean }, index: number) => ({
+          id: loc.user_id.toString(),
+          name: loc.username,
+          dog: "",
+          breed: "",
+          avatar: loc.username[0].toUpperCase(),
+          status: loc.is_active ? "Aktywny" : null,
+          color: COLORS[index % COLORS.length],
+          lat: loc.latitude,
+          lng: loc.longitude,
+        }));
+        setFriends(mappedFriends);
+      } catch (error) {
+        console.error("Failed to fetch locations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchLocations();
+    }
+  }, [isAuthenticated]);
 
   // Handle friend from URL param
   useEffect(() => {
@@ -118,6 +163,29 @@ function MapaPageContent() {
     }
   };
 
+  const handleShareLocation = async () => {
+    if (!myLocation) return;
+    
+    setSharingLocation(true);
+    try {
+      await locationsApi.updateMyLocation(myLocation.lat, myLocation.lng);
+      alert("Lokalizacja udostępniona!");
+    } catch (error) {
+      console.error("Failed to share location:", error);
+      alert("Nie udało się udostępnić lokalizacji");
+    } finally {
+      setSharingLocation(false);
+    }
+  };
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 pb-8">
       {/* Header */}
@@ -139,7 +207,13 @@ function MapaPageContent() {
           <Button color="default" variant="flat" startContent={<span>🎯</span>} onPress={handleCenterOnMe}>
             Moja lokalizacja
           </Button>
-          <Button color="primary" variant="shadow" startContent={<span>📍</span>}>
+          <Button 
+            color="primary" 
+            variant="shadow" 
+            startContent={<span>📍</span>}
+            isLoading={sharingLocation}
+            onPress={handleShareLocation}
+          >
             Udostępnij lokalizację
           </Button>
         </div>
