@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     jwt_access_token_minutes: int = 60 * 24 * 7
 
     # CORS: comma-separated list
-    cors_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003,http://localhost:3004,http://localhost:3005"
+    cors_origins: str = "*"
 
 
 settings = Settings()
