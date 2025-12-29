@@ -1,62 +1,60 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "Psiarze",
+  description: "Aplikacja dla właścicieli psów - umów się na spacer ze znajomymi!",
   navItems: [
     {
-      label: "Home",
+      label: "Start",
       href: "/",
+      icon: "🏠",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Czaty",
+      href: "/czaty",
+      icon: "💬",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "Mapa",
+      href: "/mapa",
+      icon: "🗺️",
     },
     {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
-      href: "/about",
+      label: "Znajomi",
+      href: "/znajomi",
+      icon: "👥",
     },
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Start",
+      href: "/",
+      icon: "🏠",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Czaty",
+      href: "/czaty",
+      icon: "💬",
     },
     {
-      label: "Projects",
-      href: "/projects",
+      label: "Mapa",
+      href: "/mapa",
+      icon: "🗺️",
     },
     {
-      label: "Team",
-      href: "/team",
+      label: "Znajomi",
+      href: "/znajomi",
+      icon: "👥",
     },
     {
-      label: "Calendar",
-      href: "/calendar",
+      label: "Mój Profil",
+      href: "/profil",
+      icon: "🐕",
     },
     {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
+      label: "Ustawienia",
+      href: "/ustawienia",
+      icon: "⚙️",
     },
   ],
   links: {

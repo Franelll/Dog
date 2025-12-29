@@ -1,52 +1,60 @@
-# Next.js & HeroUI Template
+# 🐕 Psiarze - Aplikacja dla właścicieli psów
 
-This is a template for creating applications using Next.js 14 (app directory) and HeroUI (v2).
+Aplikacja społecznościowa dla właścicieli psów, która pozwala:
 
-[Try it on CodeSandbox](https://githubbox.com/heroui-inc/heroui/next-app-template)
+- **Czatować** ze znajomymi psiarzami
+- **Ogłosić spacer** jednym kliknięciem ("Za 20 min będę w parku!")
+- **Zobaczyć na mapie** gdzie są Twoi znajomi z psami
+- **Zarządzać listą znajomych** psiarzy
 
-## Technologies Used
-
-- [Next.js 14](https://nextjs.org/docs/getting-started)
-- [HeroUI v2](https://heroui.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Tailwind Variants](https://tailwind-variants.org)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Framer Motion](https://www.framer.com/motion/)
-- [next-themes](https://github.com/pacocoursey/next-themes)
-
-## How to Use
-
-### Use the template with create-next-app
-
-To create a new project based on this template using `create-next-app`, run the following command:
+## 🚀 Jak uruchomić
 
 ```bash
-npx create-next-app -e https://github.com/heroui-inc/next-app-template
-```
-
-### Install dependencies
-
-You can use one of them `npm`, `yarn`, `pnpm`, `bun`, Example using `npm`:
-
-```bash
+# Zainstaluj zależności
 npm install
-```
 
-### Run the development server
-
-```bash
+# Uruchom serwer developerski
 npm run dev
 ```
 
-### Setup pnpm (optional)
+Aplikacja będzie dostępna pod adresem: **http://localhost:3000**
 
-If you are using `pnpm`, you need to add the following code to your `.npmrc` file:
+Wejdź na **http://localhost:3000/psiarze** żeby zobaczyć MVP!
 
-```bash
-public-hoist-pattern[]=*@heroui/*
-```
+## 📱 Funkcje MVP
 
-After modifying the `.npmrc` file, you need to run `pnpm install` again to ensure that the dependencies are installed correctly.
+### Zakładka "Czat"
+- Grupowy czat ze znajomymi
+- Szybkie przyciski "Za 10/20/30 min" do ogłoszenia spaceru
+- Wiadomości statusowe wyróżnione kolorem
+
+### Zakładka "Mapa"  
+- Wizualizacja lokalizacji znajomych
+- Twoja pozycja (z Geolocation API)
+- Status dostępności znajomych
+
+### Zakładka "Znajomi"
+- Lista znajomych psiarzy
+- Informacje o psach
+- Możliwość dodania nowych znajomych (placeholder)
+
+## 🛠 Technologie
+
+- [Next.js 15](https://nextjs.org/) (App Router + Turbopack)
+- [HeroUI v2](https://heroui.com/) - komponenty UI
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Framer Motion](https://www.framer.com/motion/)
+
+## 📝 TODO (rozwój aplikacji)
+
+- [ ] Backend z bazą danych (Prisma + PostgreSQL)
+- [ ] Autoryzacja użytkowników (NextAuth.js)
+- [ ] Real-time chat (WebSockets / Pusher)
+- [ ] Prawdziwa mapa (Leaflet / Google Maps)
+- [ ] Push notifications
+- [ ] Profil użytkownika i psa
+- [ ] Wyszukiwanie parków w okolicy
 
 ## License
 

@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -8,67 +10,49 @@ import {
   NavbarMenuItem,
 } from "@heroui/navbar";
 import { Button } from "@heroui/button";
-import { Kbd } from "@heroui/kbd";
 import { Link } from "@heroui/link";
-import { Input } from "@heroui/input";
+import { Avatar } from "@heroui/avatar";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
 import { ThemeSwitch } from "@/components/theme-switch";
-import {
-  TwitterIcon,
-  GithubIcon,
-  DiscordIcon,
-  HeartFilledIcon,
-  SearchIcon,
-  Logo,
-} from "@/components/icons";
+import { DogIcon } from "@/components/icons";
 
 export const Navbar = () => {
-  const searchInput = (
-    <Input
-      aria-label="Search"
-      classNames={{
-        inputWrapper: "bg-default-100",
-        input: "text-sm",
-      }}
-      endContent={
-        <Kbd className="hidden lg:inline-block" keys={["command"]}>
-          K
-        </Kbd>
-      }
-      labelPlacement="outside"
-      placeholder="Search..."
-      startContent={
-        <SearchIcon className="text-base text-default-400 pointer-events-none flex-shrink-0" />
-      }
-      type="search"
-    />
-  );
-
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar 
+      maxWidth="xl" 
+      position="sticky"
+      classNames={{
+        base: "bg-background/70 backdrop-blur-lg border-b border-default-100",
+        wrapper: "px-4 sm:px-6",
+      }}
+    >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-1" href="/">
-            <Logo />
-            <p className="font-bold text-inherit">ACME</p>
+          <NextLink className="flex justify-start items-center gap-2 group" href="/">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
+              <DogIcon size={24} className="text-white" />
+            </div>
+            <p className="font-bold text-xl text-gradient">Psiarze</p>
           </NextLink>
         </NavbarBrand>
-        <ul className="hidden lg:flex gap-4 justify-start ml-2">
+        <ul className="hidden lg:flex gap-6 justify-start ml-6">
           {siteConfig.navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
                   linkStyles({ color: "foreground" }),
-                  "data-[active=true]:text-primary data-[active=true]:font-medium",
+                  "data-[active=true]:text-primary data-[active=true]:font-medium font-medium hover:text-primary transition-colors flex items-center gap-1.5",
                 )}
                 color="foreground"
                 href={item.href}
               >
-                {item.label}
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
               </NextLink>
             </NavbarItem>
           ))}
@@ -79,58 +63,84 @@ export const Navbar = () => {
         className="hidden sm:flex basis-1/5 sm:basis-full"
         justify="end"
       >
-        <NavbarItem className="hidden sm:flex gap-2">
-          <Link isExternal aria-label="Twitter" href={siteConfig.links.twitter}>
-            <TwitterIcon className="text-default-500" />
-          </Link>
-          <Link isExternal aria-label="Discord" href={siteConfig.links.discord}>
-            <DiscordIcon className="text-default-500" />
-          </Link>
-          <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-            <GithubIcon className="text-default-500" />
-          </Link>
+        <NavbarItem className="hidden sm:flex gap-3 items-center">
           <ThemeSwitch />
-        </NavbarItem>
-        <NavbarItem className="hidden lg:flex">{searchInput}</NavbarItem>
-        <NavbarItem className="hidden md:flex">
-          <Button
-            isExternal
-            as={Link}
-            className="text-sm font-normal text-default-600 bg-default-100"
-            href={siteConfig.links.sponsor}
-            startContent={<HeartFilledIcon className="text-danger" />}
-            variant="flat"
-          >
-            Sponsor
-          </Button>
+          
+          {/* Profile Dropdown */}
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Avatar
+                as="button"
+                className="transition-transform hover:scale-105 bg-gradient-to-br from-amber-400 to-orange-500 text-white cursor-pointer"
+                name="J"
+                size="sm"
+              />
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Profile Actions" variant="flat">
+              <DropdownItem key="profile" className="h-14 gap-2" textValue="Signed in as Jan">
+                <p className="font-semibold">Zalogowany jako</p>
+                <p className="font-semibold text-primary">Jan Kowalski</p>
+              </DropdownItem>
+              <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+                🐕 Mój profil
+              </DropdownItem>
+              <DropdownItem key="settings" as={NextLink} href="/ustawienia" textValue="Ustawienia">
+                ⚙️ Ustawienia
+              </DropdownItem>
+              <DropdownItem key="help" textValue="Pomoc">
+                ❓ Pomoc
+              </DropdownItem>
+              <DropdownItem key="logout" color="danger" textValue="Wyloguj">
+                🚪 Wyloguj się
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </NavbarItem>
       </NavbarContent>
 
       <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
-        <Link isExternal aria-label="Github" href={siteConfig.links.github}>
-          <GithubIcon className="text-default-500" />
-        </Link>
         <ThemeSwitch />
+        <Dropdown placement="bottom-end">
+          <DropdownTrigger>
+            <Avatar
+              as="button"
+              className="transition-transform bg-gradient-to-br from-amber-400 to-orange-500 text-white"
+              name="J"
+              size="sm"
+            />
+          </DropdownTrigger>
+          <DropdownMenu aria-label="Profile Actions" variant="flat">
+            <DropdownItem key="profile" className="h-14 gap-2" textValue="Signed in as Jan">
+              <p className="font-semibold">Zalogowany jako</p>
+              <p className="font-semibold text-primary">Jan Kowalski</p>
+            </DropdownItem>
+            <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+              🐕 Mój profil
+            </DropdownItem>
+            <DropdownItem key="logout" color="danger" textValue="Wyloguj">
+              🚪 Wyloguj się
+            </DropdownItem>
+          </DropdownMenu>
+        </Dropdown>
         <NavbarMenuToggle />
       </NavbarContent>
 
-      <NavbarMenu>
-        {searchInput}
-        <div className="mx-4 mt-2 flex flex-col gap-2">
+      <NavbarMenu className="pt-6 bg-background/95 backdrop-blur-lg">
+        <div className="mx-4 mt-2 flex flex-col gap-3">
           {siteConfig.navMenuItems.map((item, index) => (
-            <NavbarMenuItem key={`${item}-${index}`}>
+            <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
                 color={
-                  index === 2
+                  item.label === "Mój Profil"
                     ? "primary"
-                    : index === siteConfig.navMenuItems.length - 1
-                      ? "danger"
-                      : "foreground"
+                    : "foreground"
                 }
-                href="#"
+                href={item.href}
                 size="lg"
+                className="w-full py-2 flex items-center gap-2"
               >
-                {item.label}
+                <span>{item.icon}</span>
+                <span>{item.label}</span>
               </Link>
             </NavbarMenuItem>
           ))}
