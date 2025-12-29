@@ -14,7 +14,13 @@ def _normalize_db_url(url: str) -> str:
         return url + "?check_same_thread=false"
     # Render uses postgres:// but SQLAlchemy 2.x needs postgresql://
     if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql://", 1)
+        url = url.replace("postgres://", "postgresql://", 1)
+    # Add sslmode for Render PostgreSQL if not already present
+    if url.startswith("postgresql://") and "sslmode" not in url:
+        if "?" in url:
+            url = url + "&sslmode=require"
+        else:
+            url = url + "?sslmode=require"
     return url
 
 
