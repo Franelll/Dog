@@ -76,11 +76,11 @@ export const Navbar = () => {
                 size="sm"
               />
             </DropdownTrigger>
-            <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2" textValue="Signed in as Jan">
-                <p className="font-semibold">Zalogowany jako</p>
-                <p className="font-semibold text-primary">Jan Kowalski</p>
-              </DropdownItem>
+              <DropdownMenu aria-label="Profile Actions" variant="flat">
+                <DropdownItem key="profile" className="h-14 gap-2">
+                  <p className="font-semibold">Zalogowany jako</p>
+                  <p className="font-semibold text-primary">Jan Kowalski</p>
+                </DropdownItem>
               <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
                 🐕 Mój profil
               </DropdownItem>
