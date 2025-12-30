@@ -172,7 +172,7 @@ export default function ZnajomiPage() {
   const handleWriteMessage = async (friend: Friend) => {
     try {
       // Create or get existing chat room
-      const room = await chatsApi.createRoom(friend.id);
+      const room = await chatsApi.createRoom(friend.id) as any;
       router.push(`/czaty?room=${room.id}`);
     } catch (err: any) {
       alert(err.message || "Nie udało się otworzyć czatu");
