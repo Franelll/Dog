@@ -138,6 +138,10 @@ function CzatyPageContent() {
     };
 
     fetchMessages();
+
+    // Poll for new messages every 3 seconds
+    const interval = setInterval(fetchMessages, 3000);
+    return () => clearInterval(interval);
   }, [selectedRoom, user]);
 
   const sendMessage = async () => {
@@ -152,7 +156,7 @@ function CzatyPageContent() {
         text: newMessage,
         time: new Date().toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
         type: "chat",
-        avatar: "J",
+        avatar: "Ty",
       };
       setMessagesByRoom(prev => ({
         ...prev,
