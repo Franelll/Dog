@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import uuid
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -37,6 +37,8 @@ class Dog(Base):
 
     name: Mapped[str] = mapped_column(String(80), nullable=False)
     breed: Mapped[str] = mapped_column(String(120), default="", nullable=False)
+    age: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
+    weight: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
 
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=lambda: dt.datetime.now(dt.timezone.utc))
 
