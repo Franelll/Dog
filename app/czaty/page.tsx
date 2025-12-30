@@ -37,7 +37,7 @@ function CzatyPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomIdFromUrl = searchParams.get("room");
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<ChatRoom | null>(null);
@@ -117,14 +117,17 @@ function CzatyPageContent() {
       
       try {
         const data = await chatsApi.getMessages(selectedRoom.id);
-        const mappedMessages: Message[] = data.map((msg: { id: string; text: string; sender_id: string; created_at: string }) => ({
-          id: msg.id,
-          from: `User ${msg.sender_id.substring(0, 4)}`,
-          text: msg.text,
-          time: new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
-          type: "chat" as const,
-          avatar: "U",
-        }));
+        const mappedMessages: Message[] = data.map((msg: { id: string; text: string; sender_id: string; created_at: string }) => {
+          const isMe = user?.id === msg.sender_id;
+          return {
+            id: msg.id,
+            from: isMe ? "Ty" : selectedRoom.name,
+            text: msg.text,
+            time: new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
+            type: "chat" as const,
+            avatar: isMe ? "Ty" : selectedRoom.name[0],
+          };
+        });
         setMessagesByRoom(prev => ({
           ...prev,
           [selectedRoom.id]: mappedMessages,
@@ -135,7 +138,7 @@ function CzatyPageContent() {
     };
 
     fetchMessages();
-  }, [selectedRoom]);
+  }, [selectedRoom, user?.id]);
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedRoom) return;
