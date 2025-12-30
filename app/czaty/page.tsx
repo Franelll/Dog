@@ -113,19 +113,19 @@ function CzatyPageContent() {
   // Fetch messages for selected room
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!selectedRoom) return;
+      if (!selectedRoom || !user) return;
       
       try {
         const data = await chatsApi.getMessages(selectedRoom.id);
         const mappedMessages: Message[] = data.map((msg: { id: string; text: string; sender_id: string; created_at: string }) => {
-          const isMe = user?.id === msg.sender_id;
+          const isMe = user.id === msg.sender_id;
           return {
             id: msg.id,
-            from: isMe ? "Ty" : selectedRoom.name,
+            from: isMe ? "Ty" : (selectedRoom.name || "Użytkownik"),
             text: msg.text,
             time: new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
             type: "chat" as const,
-            avatar: isMe ? "Ty" : selectedRoom.name[0],
+            avatar: isMe ? "Ty" : (selectedRoom.name?.[0] || "U"),
           };
         });
         setMessagesByRoom(prev => ({
@@ -138,7 +138,7 @@ function CzatyPageContent() {
     };
 
     fetchMessages();
-  }, [selectedRoom, user?.id]);
+  }, [selectedRoom, user]);
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedRoom) return;
