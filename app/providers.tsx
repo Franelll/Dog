@@ -30,9 +30,8 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <NextThemesProvider {...themeProps}>
         <AuthProvider>
-          <ToastProvider>
-            {children}
-          </ToastProvider>
+          <ToastProvider />
+          {children}
         </AuthProvider>
       </NextThemesProvider>
     </HeroUIProvider>
