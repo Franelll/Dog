@@ -23,7 +23,17 @@ export async function apiClient<T = any>(endpoint: string, options: FetchOptions
     
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
-      throw new Error(errorBody.detail || `Error: ${response.status} ${response.statusText}`);
+      let errorMessage = errorBody.detail || `Error: ${response.status} ${response.statusText}`;
+      
+      if (typeof errorMessage !== 'string') {
+        if (Array.isArray(errorMessage)) {
+          errorMessage = errorMessage.map((e: any) => e.msg || JSON.stringify(e)).join(', ');
+        } else {
+          errorMessage = JSON.stringify(errorMessage);
+        }
+      }
+      
+      throw new Error(errorMessage);
     }
 
     return await response.json();
