@@ -12,6 +12,7 @@ class RoomCreate(BaseModel):
 class RoomPublic(BaseModel):
     id: str
     created_at: dt.datetime
+    name: str | None = None  # Name of the other user in the room
 
 
 class MessageCreate(BaseModel):

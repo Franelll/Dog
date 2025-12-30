@@ -12,6 +12,19 @@ from app.services.deps import get_current_user
 router = APIRouter(prefix="/chats", tags=["chats"])
 
 
+def _get_room_name(db: Session, room_id: str, current_user_id: str) -> str | None:
+    """Get the name of the other user in a 1:1 chat room."""
+    members = db.execute(
+        select(ChatRoomMember).where(ChatRoomMember.room_id == room_id)
+    ).scalars().all()
+    for member in members:
+        if member.user_id != current_user_id:
+            other_user = db.get(User, member.user_id)
+            if other_user:
+                return other_user.username
+    return None
+
+
 def _room_has_member(db: Session, room_id: str, user_id: str) -> bool:
     m = db.execute(
         select(ChatRoomMember).where(and_(ChatRoomMember.room_id == room_id, ChatRoomMember.user_id == user_id))
@@ -38,7 +51,7 @@ def create_room(payload: RoomCreate, user: User = Depends(get_current_user), db:
         if _room_has_member(db, rid, payload.other_user_id):
             room = db.get(ChatRoom, rid)
             if room:
-                return RoomPublic(id=room.id, created_at=room.created_at)
+                return RoomPublic(id=room.id, created_at=room.created_at, name=other.username)
 
     room = ChatRoom()
     db.add(room)
@@ -49,14 +62,14 @@ def create_room(payload: RoomCreate, user: User = Depends(get_current_user), db:
     db.add(ChatRoomMember(room_id=room.id, user_id=payload.other_user_id))
     db.commit()
 
-    return RoomPublic(id=room.id, created_at=room.created_at)
+    return RoomPublic(id=room.id, created_at=room.created_at, name=other.username)
 
 
 @router.get("/rooms", response_model=list[RoomPublic])
 def list_rooms(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     room_ids = db.execute(select(ChatRoomMember.room_id).where(ChatRoomMember.user_id == user.id)).scalars().all()
     rooms = db.execute(select(ChatRoom).where(ChatRoom.id.in_(room_ids)).order_by(ChatRoom.created_at.desc())).scalars().all()
-    return [RoomPublic(id=r.id, created_at=r.created_at) for r in rooms]
+    return [RoomPublic(id=r.id, created_at=r.created_at, name=_get_room_name(db, r.id, user.id)) for r in rooms]
 
 
 @router.get("/rooms/{room_id}/messages", response_model=list[MessagePublic])
