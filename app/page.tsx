@@ -38,7 +38,7 @@ const features = [
 const dogBreeds = ["🐕", "🦮", "🐕‍🦺", "🐩", "🐶"];
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   
   return (
     <div className="relative">
@@ -110,7 +110,7 @@ export default function Home() {
             </p>
 
             {/* CTA Buttons */}
-            {!isAuthenticated && (
+            {!isLoading && !isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button
                   as={Link}
@@ -233,7 +233,7 @@ export default function Home() {
                 Zarejestruj się już dziś i zacznij organizować wspólne spacery 
                 ze znajomymi i ich pupilami.
               </p>
-              {!isAuthenticated && (
+              {!isLoading && !isAuthenticated && (
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     as={Link}
@@ -265,7 +265,7 @@ export default function Home() {
             <p className="text-default-500 text-lg mb-8 max-w-2xl mx-auto">
               Dołącz do społeczności psiarzy i organizuj spacery ze znajomymi w łatwy sposób!
             </p>
-            {!isAuthenticated && (
+            {!isLoading && !isAuthenticated && (
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
                   as={Link}
