@@ -23,6 +23,18 @@ def list_requests(user: User = Depends(get_current_user), db: Session = Depends(
         .scalars()
         .all()
     )
+    
+    # Get usernames for all users involved
+    user_ids = set()
+    for r in reqs:
+        user_ids.add(r.from_user_id)
+        user_ids.add(r.to_user_id)
+    
+    users_map = {}
+    if user_ids:
+        users = db.execute(select(User).where(User.id.in_(user_ids))).scalars().all()
+        users_map = {u.id: u.username for u in users}
+    
     return [
         FriendRequestPublic(
             id=r.id,
@@ -30,6 +42,8 @@ def list_requests(user: User = Depends(get_current_user), db: Session = Depends(
             to_user_id=r.to_user_id,
             status=r.status,
             created_at=r.created_at,
+            from_username=users_map.get(r.from_user_id),
+            to_username=users_map.get(r.to_user_id),
         )
         for r in reqs
     ]
