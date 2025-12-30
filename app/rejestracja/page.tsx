@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -30,14 +30,17 @@ export default function RejeestracjaPage() {
   // Dog data
   const [dogName, setDogName] = useState("");
   const [dogBreed, setDogBreed] = useState("");
+  
+  const isRegisteringRef = useRef(false);
 
-  // Redirect if already logged in
-  if (isAuthenticated) {
-    router.push("/czaty");
-    return null;
-  }
+  // Redirect if already logged in (but not during registration flow)
+  useEffect(() => {
+    if (isAuthenticated && !isRegisteringRef.current) {
+      router.push("/czaty");
+    }
+  }, [isAuthenticated, router]);
 
-  const handleStep1 = (e: React.FormEvent) => {
+  const handleStep1 = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -58,7 +61,18 @@ export default function RejeestracjaPage() {
       return;
     }
 
-    setStep(2);
+    setIsLoading(true);
+    isRegisteringRef.current = true;
+
+    try {
+      await register(email, username, password);
+      setStep(2);
+    } catch (err: any) {
+      isRegisteringRef.current = false;
+      setError(err.message || "Błąd rejestracji.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -67,9 +81,7 @@ export default function RejeestracjaPage() {
     setIsLoading(true);
 
     try {
-      // Register user with backend
-      await register(email, username, password);
-
+      // User is already registered in step 1
       // Add dog if provided
       if (dogName) {
         await addDog(dogName, dogBreed || "Mieszaniec");
@@ -77,7 +89,7 @@ export default function RejeestracjaPage() {
 
       router.push("/czaty");
     } catch (err: any) {
-      setError(err.message || "Błąd rejestracji. Spróbuj ponownie.");
+      setError(err.message || "Błąd dodawania psa.");
     } finally {
       setIsLoading(false);
     }
@@ -184,6 +196,7 @@ export default function RejeestracjaPage() {
                   size="lg"
                   radius="full"
                   className="font-semibold mt-2"
+                  isLoading={isLoading}
                 >
                   Dalej →
                 </Button>
