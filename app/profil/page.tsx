@@ -114,26 +114,45 @@ export default function ProfilPage() {
   const handleSave = async () => {
     if (!editForm) return;
     
-    // Update dog if exists
-    if (editForm.dog.name) {
-      try {
+    try {
+      // Update dog if exists
+      if (editForm.dog.name) {
         if (dogs.length === 0) {
           // Create new dog
           await dogsApi.addDog({
             name: editForm.dog.name,
             breed: editForm.dog.breed,
-            age: editForm.dog.age,
-            weight: editForm.dog.weight,
+            age: editForm.dog.age || undefined,
+            weight: editForm.dog.weight || undefined,
+          });
+        } else if (dogs[0]?.id) {
+          // Update existing dog
+          await dogsApi.updateDog(dogs[0].id, {
+            name: editForm.dog.name,
+            breed: editForm.dog.breed,
+            age: editForm.dog.age || undefined,
+            weight: editForm.dog.weight || undefined,
           });
         }
-        // Note: Backend doesn't have dog update endpoint yet
-      } catch (error) {
-        console.error("Failed to save dog:", error);
       }
+      
+      setUserData(editForm);
+      setIsEditing(false);
+      
+      // Refresh dogs data to get updated info from server
+      const dogsData = await dogsApi.getMyDogs();
+      const mappedDogs: Dog[] = dogsData.map((dog: { id: string; name: string; breed: string; age: number; weight: number }) => ({
+        id: dog.id,
+        name: dog.name,
+        breed: dog.breed || "",
+        age: dog.age || 0,
+        weight: dog.weight || 0,
+        photo: "🐕",
+      }));
+      setDogs(mappedDogs);
+    } catch (error: any) {
+      alert(error.message || "Nie udało się zapisać zmian");
     }
-    
-    setUserData(editForm);
-    setIsEditing(false);
   };
 
   const handleCancel = () => {

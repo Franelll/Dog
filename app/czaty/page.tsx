@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -8,7 +8,7 @@ import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
 import { Divider } from "@heroui/divider";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { SendIcon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
@@ -33,8 +33,10 @@ type ChatRoom = {
   members: number;
 };
 
-export default function CzatyPage() {
+function CzatyPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roomIdFromUrl = searchParams.get("room");
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
@@ -69,7 +71,16 @@ export default function CzatyPage() {
           members: 2,
         }));
         setRooms(mappedRooms);
-        if (mappedRooms.length > 0) {
+        
+        // Select room from URL or first room
+        if (roomIdFromUrl) {
+          const urlRoom = mappedRooms.find(r => r.id === roomIdFromUrl);
+          if (urlRoom) {
+            setSelectedRoom(urlRoom);
+          } else if (mappedRooms.length > 0) {
+            setSelectedRoom(mappedRooms[0]);
+          }
+        } else if (mappedRooms.length > 0) {
           setSelectedRoom(mappedRooms[0]);
         }
       } catch (error) {
@@ -82,7 +93,7 @@ export default function CzatyPage() {
     if (isAuthenticated) {
       fetchRooms();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, roomIdFromUrl]);
 
   // Fetch messages for selected room
   useEffect(() => {
@@ -374,5 +385,17 @@ export default function CzatyPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function CzatyPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    }>
+      <CzatyPageContent />
+    </Suspense>
   );
 }

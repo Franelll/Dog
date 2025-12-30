@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 
 import { DogIcon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
-import { friendsApi, usersApi } from "@/lib/api-services";
+import { friendsApi, usersApi, chatsApi, locationsApi } from "@/lib/api-services";
 
 const COLORS = ["bg-pink-500", "bg-blue-500", "bg-purple-500", "bg-emerald-500", "bg-rose-500", "bg-cyan-500", "bg-amber-500", "bg-indigo-500"];
 
@@ -66,10 +66,12 @@ export default function ZnajomiPage() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  // Load discover users when modal is opened or search changes
+  // Load discover users when search changes (min 2 characters)
   useEffect(() => {
-    if (showDiscoverModal) {
+    if (showDiscoverModal && discoverSearch.length >= 2) {
       loadDiscoverUsers();
+    } else if (showDiscoverModal) {
+      setDiscoverUsers([]);
     }
   }, [showDiscoverModal, discoverSearch]);
 
@@ -167,12 +169,24 @@ export default function ZnajomiPage() {
     f.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleWriteMessage = (friend: Friend) => {
-    router.push(`/czaty?friend=${encodeURIComponent(friend.name)}`);
+  const handleWriteMessage = async (friend: Friend) => {
+    try {
+      // Create or get existing chat room
+      const room = await chatsApi.createRoom(friend.id);
+      router.push(`/czaty?room=${room.id}`);
+    } catch (err: any) {
+      alert(err.message || "Nie udało się otworzyć czatu");
+    }
   };
 
-  const handleShowOnMap = (friend: Friend) => {
-    router.push(`/mapa?friend=${friend.id}`);
+  const handleShowOnMap = async (friend: Friend) => {
+    try {
+      // Check if friend shares location
+      await locationsApi.getFriendLocation(friend.id);
+      router.push(`/mapa?friend=${friend.id}`);
+    } catch (err: any) {
+      alert(err.message || "Znajomy nie udostępnia swojej lokalizacji");
+    }
   };
 
   // Filter discover users to exclude those we already have relationship with
@@ -515,14 +529,15 @@ export default function ZnajomiPage() {
               startContent={<span className="text-default-400">🔍</span>}
             />
 
-            {availableDiscoverUsers.length === 0 ? (
+            {discoverSearch.length < 2 ? (
+              <div className="text-center py-8">
+                <span className="text-4xl block mb-2">✍️</span>
+                <p className="text-default-500">Wpisz minimum 2 znaki aby wyszukać użytkownika</p>
+              </div>
+            ) : availableDiscoverUsers.length === 0 ? (
               <div className="text-center py-8">
                 <span className="text-4xl block mb-2">🐕</span>
-                <p className="text-default-500">
-                  {discoverSearch 
-                    ? "Nie znaleziono użytkowników o takiej nazwie" 
-                    : "Brak nowych psiarzy do odkrycia"}
-                </p>
+                <p className="text-default-500">Nie znaleziono użytkowników o nazwie "{discoverSearch}"</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">

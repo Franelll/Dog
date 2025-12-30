@@ -37,15 +37,18 @@ export const chatsApi = {
 // ============ LOCATIONS ============
 
 export const locationsApi = {
-  updateMyLocation: (lat: number, lng: number) => request("/locations/me", { method: "PUT", body: JSON.stringify({ latitude: lat, longitude: lng }) }),
+  updateMyLocation: (lat: number, lng: number) => request("/locations/me", { method: "PUT", body: JSON.stringify({ latitude: lat, longitude: lng, is_sharing: true }) }),
   getFriendsLocations: () => request<any[]>("/locations/friends"),
+  getFriendLocation: (friendId: string) => request<any>(`/locations/friends/${friendId}`),
 };
 
 // ============ DOGS ============
 
 export const dogsApi = {
   getMyDogs: () => request<any[]>("/dogs/mine"),
-  addDog: (data: { name: string; breed: string; age: number; weight: number }) => request("/dogs/mine", { method: "POST", body: JSON.stringify(data) }),
+  addDog: (data: { name: string; breed: string; age?: number; weight?: number }) => request("/dogs/mine", { method: "POST", body: JSON.stringify(data) }),
+  updateDog: (dogId: string, data: { name?: string; breed?: string; age?: number; weight?: number }) => 
+    request(`/dogs/mine/${dogId}`, { method: "PUT", body: JSON.stringify(data) }),
   deleteDog: (dogId: string) => request(`/dogs/mine/${dogId}`, { method: "DELETE" }),
 };
 
