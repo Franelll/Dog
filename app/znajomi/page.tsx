@@ -136,7 +136,11 @@ export default function ZnajomiPage() {
       // Reload data
       await loadFriendsData();
     } catch (err: any) {
-      alert(err.message || "Nie udało się wysłać zaproszenia");
+      addToast({
+        title: "Błąd",
+        description: err.message || "Nie udało się wysłać zaproszenia",
+        color: "danger",
+      });
     } finally {
       setSendingRequest(null);
     }
@@ -148,7 +152,11 @@ export default function ZnajomiPage() {
       await friendsApi.accept(requestId);
       await loadFriendsData();
     } catch (err: any) {
-      alert(err.message || "Nie udało się zaakceptować zaproszenia");
+      addToast({
+        title: "Błąd",
+        description: err.message || "Nie udało się zaakceptować zaproszenia",
+        color: "danger",
+      });
     } finally {
       setProcessingRequest(null);
     }
@@ -160,7 +168,11 @@ export default function ZnajomiPage() {
       await friendsApi.reject(requestId);
       await loadFriendsData();
     } catch (err: any) {
-      alert(err.message || "Nie udało się odrzucić zaproszenia");
+      addToast({
+        title: "Błąd",
+        description: err.message || "Nie udało się odrzucić zaproszenia",
+        color: "danger",
+      });
     } finally {
       setProcessingRequest(null);
     }

@@ -128,10 +128,16 @@ function CzatyPageContent() {
             avatar: isMe ? "Ty" : (selectedRoom.name?.[0] || "U"),
           };
         });
-        setMessagesByRoom(prev => ({
-          ...prev,
-          [selectedRoom.id]: mappedMessages,
-        }));
+        
+        // Deduplicate messages by ID
+        setMessagesByRoom(prev => {
+          const existingIds = new Set((prev[selectedRoom.id] || []).map(m => m.id));
+          const newMessages = mappedMessages.filter(m => !existingIds.has(m.id));
+          return {
+            ...prev,
+            [selectedRoom.id]: [...(prev[selectedRoom.id] || []), ...newMessages],
+          };
+        });
       } catch (error) {
         console.error("Failed to fetch messages:", error);
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -23,10 +23,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
 
   // Redirect if already logged in
-  if (isAuthenticated) {
-    router.push("/czaty");
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/czaty");
+    }
+  }, [isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
