@@ -7,6 +7,7 @@ import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
 import { Divider } from "@heroui/divider";
 import { Chip } from "@heroui/chip";
+import { addToast } from "@heroui/toast";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -150,8 +151,18 @@ export default function ProfilPage() {
         photo: "🐕",
       }));
       setDogs(mappedDogs);
+      
+      addToast({
+        title: "Sukces",
+        description: "Profil został zaktualizowany",
+        color: "success",
+      });
     } catch (error: any) {
-      alert(error.message || "Nie udało się zapisać zmian");
+      addToast({
+        title: "Błąd",
+        description: error.message || "Nie udało się zapisać zmian",
+        color: "danger",
+      });
     }
   };
 

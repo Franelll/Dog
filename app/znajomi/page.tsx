@@ -6,7 +6,8 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Avatar } from "@heroui/avatar";
 import { Chip } from "@heroui/chip";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@heroui/modal";
+import { addToast } from "@heroui/toast";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/modal";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -172,10 +173,14 @@ export default function ZnajomiPage() {
   const handleWriteMessage = async (friend: Friend) => {
     try {
       // Create or get existing chat room
-      const room = await chatsApi.createRoom(friend.id) as any;
+      const room = await chatsApi.createRoom(friend.id);
       router.push(`/czaty?room=${room.id}`);
     } catch (err: any) {
-      alert(err.message || "Nie udało się otworzyć czatu");
+      addToast({
+        title: "Błąd",
+        description: err.message || "Nie udało się otworzyć czatu",
+        color: "danger",
+      });
     }
   };
 
@@ -185,7 +190,11 @@ export default function ZnajomiPage() {
       await locationsApi.getFriendLocation(friend.id);
       router.push(`/mapa?friend=${friend.id}`);
     } catch (err: any) {
-      alert(err.message || "Znajomy nie udostępnia swojej lokalizacji");
+      addToast({
+        title: "Brak lokalizacji",
+        description: err.message || "Znajomy nie udostępnia swojej lokalizacji",
+        color: "warning",
+      });
     }
   };
 

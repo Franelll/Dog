@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { Card, CardBody, CardHeader, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
@@ -46,6 +46,12 @@ function CzatyPageContent() {
   const [loading, setLoading] = useState(true);
   
   const currentMessages = selectedRoom ? messagesByRoom[selectedRoom.id] || [] : [];
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -179,6 +185,10 @@ function CzatyPageContent() {
       console.error("Failed to announce walk:", error);
     }
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentMessages]);
 
   if (authLoading || loading) {
     return (
@@ -362,6 +372,7 @@ function CzatyPageContent() {
                         </div>
                       </motion.div>
                     ))}
+                    <div ref={messagesEndRef} />
                   </AnimatePresence>
                 </div>
               </CardBody>

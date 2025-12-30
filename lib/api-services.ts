@@ -28,7 +28,7 @@ export const friendsApi = {
 
 export const chatsApi = {
   getRooms: () => request<any[]>("/chats/rooms"),
-  createRoom: (otherUserId: string) => request("/chats/rooms", { method: "POST", body: JSON.stringify({ other_user_id: otherUserId }) }),
+  createRoom: (otherUserId: string) => request<{ id: string; created_at: string; name?: string }>("/chats/rooms", { method: "POST", body: JSON.stringify({ other_user_id: otherUserId }) }),
   getMessages: (roomId: string) => request<any[]>(`/chats/rooms/${roomId}/messages`),
   sendMessage: (roomId: string, text: string, kind: "text" | "announce" = "text") => 
     request(`/chats/rooms/${roomId}/messages`, { method: "POST", body: JSON.stringify({ text, kind }) }),

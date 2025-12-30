@@ -9,6 +9,7 @@ import { Divider } from "@heroui/divider";
 import { motion } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { addToast } from "@heroui/toast";
 
 import { MapPinIcon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
@@ -174,10 +175,18 @@ function MapaPageContent() {
     setSharingLocation(true);
     try {
       await locationsApi.updateMyLocation(myLocation.lat, myLocation.lng);
-      alert("Lokalizacja udostępniona!");
+      addToast({
+        title: "Sukces",
+        description: "Lokalizacja udostępniona!",
+        color: "success",
+      });
     } catch (error) {
       console.error("Failed to share location:", error);
-      alert("Nie udało się udostępnić lokalizacji");
+      addToast({
+        title: "Błąd",
+        description: "Nie udało się udostępnić lokalizacji",
+        color: "danger",
+      });
     } finally {
       setSharingLocation(false);
     }
@@ -239,13 +248,17 @@ function MapaPageContent() {
                         setLocationDenied(false);
                       },
                       () => {
-                        alert("Nie można uzyskać lokalizacji. Sprawdź ustawienia przeglądarki.");
+                        addToast({
+                          title: "Błąd",
+                          description: "Nie można uzyskać lokalizacji. Sprawdź ustawienia przeglądarki.",
+                          color: "danger",
+                        });
                       }
                     );
                   }
                 }}
               >
-                🔄 Spróbuj ponownie
+                Włącz lokalizację
               </Button>
               <p className="text-xs text-default-400 mt-4">
                 Wskazówka: Kliknij ikonę kłódki/lokalizacji w pasku adresu przeglądarki

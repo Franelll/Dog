@@ -254,10 +254,11 @@ export default function RejeestracjaPage() {
                 </div>
 
                 <Button
-                  type="submit"
+                  type="button"
                   variant="light"
                   size="sm"
                   className="text-default-500"
+                  onPress={() => router.push("/czaty")}
                 >
                   Pomiń i dokończ później
                 </Button>
