@@ -6,6 +6,7 @@ import { Link } from "@heroui/link";
 import { motion } from "framer-motion";
 
 import { DogIcon, MapPinIcon, SendIcon, ClockIcon, HeartFilledIcon } from "@/components/icons";
+import { useAuth } from "@/lib/auth-context";
 
 const features = [
   {
@@ -37,6 +38,8 @@ const features = [
 const dogBreeds = ["🐕", "🦮", "🐕‍🦺", "🐩", "🐶"];
 
 export default function Home() {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <div className="relative">
       {/* Hero Section */}
@@ -107,29 +110,31 @@ export default function Home() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button
-                as={Link}
-                href="/rejestracja"
-                color="primary"
-                size="lg"
-                radius="full"
-                className="font-semibold px-8 shadow-lg hover:shadow-xl transition-shadow text-lg"
-                startContent={<DogIcon size={24} />}
-              >
-                Zarejestruj się
-              </Button>
-              <Button
-                as={Link}
-                href="/login"
-                variant="bordered"
-                size="lg"
-                radius="full"
-                className="font-semibold px-8 border-2"
-              >
-                Zaloguj się
-              </Button>
-            </div>
+            {!isAuthenticated && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button
+                  as={Link}
+                  href="/rejestracja"
+                  color="primary"
+                  size="lg"
+                  radius="full"
+                  className="font-semibold px-8 shadow-lg hover:shadow-xl transition-shadow text-lg"
+                  startContent={<DogIcon size={24} />}
+                >
+                  Zarejestruj się
+                </Button>
+                <Button
+                  as={Link}
+                  href="/login"
+                  variant="bordered"
+                  size="lg"
+                  radius="full"
+                  className="font-semibold px-8 border-2"
+                >
+                  Zaloguj się
+                </Button>
+              </div>
+            )}
           </motion.div>
 
           {/* Stats */}
@@ -228,17 +233,19 @@ export default function Home() {
                 Zarejestruj się już dziś i zacznij organizować wspólne spacery 
                 ze znajomymi i ich pupilami.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  as={Link}
-                  href="/psiarze"
-                  size="lg"
-                  radius="full"
-                  className="bg-white text-amber-600 font-semibold px-8 shadow-lg hover:bg-amber-50"
-                >
-                  Rozpocznij za darmo
-                </Button>
-              </div>
+              {!isAuthenticated && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    as={Link}
+                    href="/rejestracja"
+                    size="lg"
+                    radius="full"
+                    className="bg-white text-amber-600 font-semibold px-8 shadow-lg hover:bg-amber-50"
+                  >
+                    Rozpocznij za darmo
+                  </Button>
+                </div>
+              )}
             </CardBody>
           </Card>
         </motion.div>
@@ -258,29 +265,31 @@ export default function Home() {
             <p className="text-default-500 text-lg mb-8 max-w-2xl mx-auto">
               Dołącz do społeczności psiarzy i organizuj spacery ze znajomymi w łatwy sposób!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                as={Link}
-                href="/rejestracja"
-                color="primary"
-                size="lg"
-                radius="full"
-                className="font-semibold px-8"
-                startContent={<span>🐕</span>}
-              >
-                Utwórz konto za darmo
-              </Button>
-              <Button
-                as={Link}
-                href="/login"
-                variant="flat"
-                size="lg"
-                radius="full"
-                className="font-semibold px-8"
-              >
-                Mam już konto
-              </Button>
-            </div>
+            {!isAuthenticated && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  as={Link}
+                  href="/rejestracja"
+                  color="primary"
+                  size="lg"
+                  radius="full"
+                  className="font-semibold px-8"
+                  startContent={<span>🐕</span>}
+                >
+                  Utwórz konto za darmo
+                </Button>
+                <Button
+                  as={Link}
+                  href="/login"
+                  variant="flat"
+                  size="lg"
+                  radius="full"
+                  className="font-semibold px-8"
+                >
+                  Mam już konto
+                </Button>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>

@@ -51,12 +51,6 @@ const COLORS = [
   "bg-indigo-500",
 ];
 
-const PARKS = [
-  { id: "1", name: "Park Skaryszewski", emoji: "🌳", friends: 0, lat: 52.236, lng: 21.055 },
-  { id: "2", name: "Park Łazienkowski", emoji: "🏛️", friends: 0, lat: 52.215, lng: 21.035 },
-  { id: "3", name: "Park Mokotowski", emoji: "🌲", friends: 0, lat: 52.205, lng: 21.005 },
-];
-
 function MapaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,6 +64,23 @@ function MapaPageContent() {
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 52.2297, lng: 21.0122 });
   const [loading, setLoading] = useState(true);
   const [sharingLocation, setSharingLocation] = useState(false);
+  const [previousFriendLocations, setPreviousFriendLocations] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+
+  // Calculate distance between two points in meters
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  };
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -118,6 +129,37 @@ function MapaPageContent() {
           lng: loc.longitude,
         }));
         setFriends(mappedFriends);
+        
+        // Check for nearby dogs
+        if (myLocation) {
+          mappedFriends.forEach(friend => {
+            if (friend.status) { // Only active friends
+              const distance = calculateDistance(myLocation.lat, myLocation.lng, friend.lat, friend.lng);
+              const previousLocation = previousFriendLocations.get(friend.id);
+              
+              // Notify if friend is within 50 meters and wasn't before
+              if (distance <= 50) {
+                const wasNearby = previousLocation ? 
+                  calculateDistance(myLocation.lat, myLocation.lng, previousLocation.lat, previousLocation.lng) <= 50 : false;
+                
+                if (!wasNearby) {
+                  addToast({
+                    title: "🐕 Pies w pobliżu!",
+                    description: `${friend.name} jest w odległości ${Math.round(distance)} metrów od Ciebie!`,
+                    color: "success",
+                  });
+                }
+              }
+            }
+          });
+          
+          // Update previous locations
+          const newLocations = new Map();
+          mappedFriends.forEach(friend => {
+            newLocations.set(friend.id, { lat: friend.lat, lng: friend.lng });
+          });
+          setPreviousFriendLocations(newLocations);
+        }
       } catch (error) {
         console.error("Failed to fetch locations:", error);
       } finally {
@@ -128,7 +170,7 @@ function MapaPageContent() {
     if (isAuthenticated) {
       fetchLocations();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, myLocation, previousFriendLocations]);
 
   // Handle friend from URL param
   useEffect(() => {
@@ -380,34 +422,6 @@ function MapaPageContent() {
               ) : (
                 <p className="text-sm text-default-500 text-center py-4">Brak aktywnych znajomych</p>
               )}
-            </CardBody>
-          </Card>
-
-          {/* Nearby Parks */}
-          <Card className="border border-default-200">
-            <CardHeader>
-              <p className="font-semibold">🌳 Parki w pobliżu</p>
-            </CardHeader>
-            <Divider />
-            <CardBody className="p-2">
-              <div className="flex flex-col gap-2">
-                {PARKS.map((park) => (
-                  <Button
-                    key={park.id}
-                    variant="light"
-                    className="w-full h-auto py-2 justify-start"
-                    onPress={() => setMapCenter({ lat: park.lat, lng: park.lng })}
-                  >
-                    <div className="flex items-center gap-3 w-full">
-                      <span className="text-2xl">{park.emoji}</span>
-                      <div className="flex-1 text-left">
-                        <p className="font-medium text-sm">{park.name}</p>
-                        <p className="text-xs text-default-500">{park.friends} psiarzy</p>
-                      </div>
-                    </div>
-                  </Button>
-                ))}
-              </div>
             </CardBody>
           </Card>
 

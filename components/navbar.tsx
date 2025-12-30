@@ -98,12 +98,6 @@ export const Navbar = () => {
                 <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
                   🐕 Mój profil
                 </DropdownItem>
-                <DropdownItem key="settings" as={NextLink} href="/ustawienia" textValue="Ustawienia">
-                  ⚙️ Ustawienia
-                </DropdownItem>
-                <DropdownItem key="help" textValue="Pomoc">
-                  ❓ Pomoc
-                </DropdownItem>
                 <DropdownItem key="logout" color="danger" textValue="Wyloguj" onPress={handleLogout}>
                   🚪 Wyloguj się
                 </DropdownItem>
