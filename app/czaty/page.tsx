@@ -74,12 +74,21 @@ function CzatyPageContent() {
         
         // Select room from URL or first room
         if (roomIdFromUrl) {
-          const urlRoom = mappedRooms.find(r => r.id === roomIdFromUrl);
-          if (urlRoom) {
-            setSelectedRoom(urlRoom);
-          } else if (mappedRooms.length > 0) {
-            setSelectedRoom(mappedRooms[0]);
+          let urlRoom = mappedRooms.find(r => r.id === roomIdFromUrl);
+          if (!urlRoom) {
+            // Room from URL not in list yet, add it
+            urlRoom = {
+              id: roomIdFromUrl,
+              name: "Nowy czat",
+              icon: "💬",
+              lastMessage: "",
+              time: "",
+              unread: 0,
+              members: 2,
+            };
+            setRooms(prev => [urlRoom!, ...prev]);
           }
+          setSelectedRoom(urlRoom);
         } else if (mappedRooms.length > 0) {
           setSelectedRoom(mappedRooms[0]);
         }
