@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 import { DogIcon } from "@/components/icons";
 import { useAuth } from "@/lib/auth-context";
-import { getFriendRequests, FriendRequest } from "@/lib/api-services";
+import { friendsApi } from "@/lib/api-services";
 
 type Friend = {
   id: string;
@@ -23,7 +23,7 @@ type Friend = {
 
 export default function ZnajomiPage() {
   const router = useRouter();
-  const { token, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -34,20 +34,19 @@ export default function ZnajomiPage() {
       return;
     }
 
-    if (token) {
+    if (isAuthenticated) {
       loadFriends();
     }
-  }, [token, isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router]);
 
   const loadFriends = async () => {
-    if (!token) return;
     setIsLoading(true);
     try {
-      const requests = await getFriendRequests(token);
+      const requests = await friendsApi.getRequests();
       // Filter only accepted requests and transform to Friend type
       const acceptedFriends = requests
-        .filter((r) => r.status === "accepted")
-        .map((r, idx) => ({
+        .filter((r: any) => r.status === "accepted")
+        .map((r: any, idx: number) => ({
           id: r.from_user_id,
           name: `Użytkownik ${idx + 1}`, // Backend doesn't return user details in friend request
           status: null,

@@ -59,9 +59,9 @@ export default function CzatyPage() {
       
       try {
         const data = await chatsApi.getRooms();
-        const mappedRooms: ChatRoom[] = data.map((room: { id: number; name: string }) => ({
-          id: room.id.toString(),
-          name: room.name,
+        const mappedRooms: ChatRoom[] = data.map((room: { id: string; name: string }) => ({
+          id: room.id,
+          name: room.name || "Czat",
           icon: "💬",
           lastMessage: "",
           time: "",
@@ -90,11 +90,11 @@ export default function CzatyPage() {
       if (!selectedRoom) return;
       
       try {
-        const data = await chatsApi.getMessages(parseInt(selectedRoom.id));
-        const mappedMessages: Message[] = data.map((msg: { id: number; content: string; sender_id: number; created_at: string }) => ({
-          id: msg.id.toString(),
-          from: `User ${msg.sender_id}`,
-          text: msg.content,
+        const data = await chatsApi.getMessages(selectedRoom.id);
+        const mappedMessages: Message[] = data.map((msg: { id: string; text: string; sender_id: string; created_at: string }) => ({
+          id: msg.id,
+          from: `User ${msg.sender_id.substring(0, 4)}`,
+          text: msg.text,
           time: new Date(msg.created_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" }),
           type: "chat" as const,
           avatar: "U",
@@ -115,7 +115,7 @@ export default function CzatyPage() {
     if (!newMessage.trim() || !selectedRoom) return;
     
     try {
-      await chatsApi.sendMessage(parseInt(selectedRoom.id), newMessage);
+      await chatsApi.sendMessage(selectedRoom.id, newMessage);
       
       const msg: Message = {
         id: Date.now().toString(),
@@ -141,7 +141,7 @@ export default function CzatyPage() {
     const text = `Za ${minutes} min będę w parku! 🐕‍🦺`;
     
     try {
-      await chatsApi.sendMessage(parseInt(selectedRoom.id), text);
+      await chatsApi.sendMessage(selectedRoom.id, text, "announce");
       
       const msg: Message = {
         id: Date.now().toString(),
