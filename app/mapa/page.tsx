@@ -64,6 +64,7 @@ function MapaPageContent() {
 
   const [friends, setFriends] = useState<Friend[]>([]);
   const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationDenied, setLocationDenied] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 52.2297, lng: 21.0122 });
   const [loading, setLoading] = useState(true);
@@ -84,12 +85,16 @@ function MapaPageContent() {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setMyLocation(loc);
           setMapCenter(loc);
+          setLocationDenied(false);
         },
         () => {
-          // Default to Warsaw if geolocation fails
-          setMyLocation({ lat: 52.2297, lng: 21.0122 });
+          // User denied location or error occurred
+          setLocationDenied(true);
+          setMyLocation(null);
         }
       );
+    } else {
+      setLocationDenied(true);
     }
   }, []);
 
@@ -100,7 +105,7 @@ function MapaPageContent() {
       
       try {
         const data = await locationsApi.getFriendsLocations();
-        const mappedFriends: Friend[] = data.map((loc: { user_id: number; username: string; latitude: number; longitude: number; is_active: boolean }, index: number) => ({
+        const mappedFriends: Friend[] = data.map((loc: { user_id: string; username: string; latitude: number; longitude: number; is_active: boolean }, index: number) => ({
           id: loc.user_id.toString(),
           name: loc.username,
           dog: "",
@@ -182,6 +187,72 @@ function MapaPageContent() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
+  // Show message if location is denied
+  if (locationDenied) {
+    return (
+      <div className="flex flex-col gap-6 pb-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
+            <MapPinIcon size={28} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gradient">Mapa</h1>
+            <p className="text-default-500">Włącz lokalizację, aby zobaczyć mapę</p>
+          </div>
+        </motion.div>
+
+        {/* Location Required Message */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="border border-default-200">
+            <CardBody className="py-16 text-center">
+              <div className="w-24 h-24 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-6">
+                <span className="text-5xl">📍</span>
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Lokalizacja wyłączona</h2>
+              <p className="text-default-500 max-w-md mx-auto mb-6">
+                Aby korzystać z mapy i widzieć znajomych w okolicy, musisz włączyć udostępnianie lokalizacji w przeglądarce.
+              </p>
+              <Button 
+                color="primary" 
+                size="lg"
+                onPress={() => {
+                  // Try to request location again
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (pos) => {
+                        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        setMyLocation(loc);
+                        setMapCenter(loc);
+                        setLocationDenied(false);
+                      },
+                      () => {
+                        alert("Nie można uzyskać lokalizacji. Sprawdź ustawienia przeglądarki.");
+                      }
+                    );
+                  }
+                }}
+              >
+                🔄 Spróbuj ponownie
+              </Button>
+              <p className="text-xs text-default-400 mt-4">
+                Wskazówka: Kliknij ikonę kłódki/lokalizacji w pasku adresu przeglądarki
+              </p>
+            </CardBody>
+          </Card>
+        </motion.div>
       </div>
     );
   }

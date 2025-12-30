@@ -53,4 +53,5 @@ export const dogsApi = {
 
 export const usersApi = {
   getMe: () => request<any>("/users/me"),
+  discover: (search?: string) => request<any[]>(`/users/discover${search ? `?search=${encodeURIComponent(search)}` : ""}`),
 };

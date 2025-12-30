@@ -15,7 +15,7 @@ import { useAuth } from "@/lib/auth-context";
 import { dogsApi, friendsApi } from "@/lib/api-services";
 
 type Dog = {
-  id?: number;
+  id?: string;
   name: string;
   breed: string;
   age: number;
@@ -63,7 +63,7 @@ export default function ProfilPage() {
       try {
         // Fetch dogs
         const dogsData = await dogsApi.getMyDogs();
-        const mappedDogs: Dog[] = dogsData.map((dog: { id: number; name: string; breed: string; age: number; weight: number }) => ({
+        const mappedDogs: Dog[] = dogsData.map((dog: { id: string; name: string; breed: string; age: number; weight: number }) => ({
           id: dog.id,
           name: dog.name,
           breed: dog.breed || "",
