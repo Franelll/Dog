@@ -51,12 +51,16 @@ export default function TestConnectionPage() {
       <h1 className="text-2xl font-bold mb-4">Test Połączenia z Backendem</h1>
 
       <div className="mb-6 p-4 bg-gray-50 rounded border">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-2"
+          htmlFor="api-url"
+        >
           Adres API (możesz edytować):
         </label>
         <div className="flex gap-2">
           <input
             className="flex-1 p-2 border rounded"
+            id="api-url"
             placeholder="https://..."
             type="text"
             value={manualUrl}
@@ -86,7 +90,7 @@ export default function TestConnectionPage() {
             <div className="text-sm mt-2 text-gray-600">
               Upewnij się, że:
               <ul className="list-disc ml-5 mt-1">
-                <li>Backend na Renderze jest "Live"</li>
+                <li>Backend na Renderze jest &quot;Live&quot;</li>
                 <li>Adres w .env.local jest poprawny (musi być https)</li>
                 <li>
                   Zrestartowałeś serwer frontendowy (npm run dev) po zmianie

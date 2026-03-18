@@ -623,7 +623,8 @@ export default function ZnajomiPage() {
               <div className="text-center py-8">
                 <span className="text-4xl block mb-2">🐕</span>
                 <p className="text-default-500">
-                  Nie znaleziono użytkowników o nazwie "{discoverSearch}"
+                  Nie znaleziono użytkowników o nazwie &quot;{discoverSearch}
+                  &quot;
                 </p>
               </div>
             ) : (
