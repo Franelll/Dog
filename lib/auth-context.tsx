@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
+
 import { apiClient } from "@/lib/api";
 
 interface User {
@@ -25,7 +32,11 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, username: string, password: string) => Promise<void>;
+  register: (
+    email: string,
+    username: string,
+    password: string,
+  ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   refreshDogs: () => Promise<void>;
@@ -59,6 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!token) return;
     try {
       const userData = await apiClient<User>("/users/me", { token });
+
       setUser(userData);
     } catch (err) {
       console.error("Failed to fetch user:", err);
@@ -70,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!token) return;
     try {
       const dogsData = await apiClient<Dog[]>("/dogs/mine", { token });
+
       setDogs(dogsData);
     } catch (err) {
       console.error("Failed to fetch dogs:", err);
@@ -79,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Load token from localStorage on mount
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
+
     if (storedToken) {
       setToken(storedToken);
     } else {
@@ -90,7 +104,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (token) {
       setIsLoading(true);
-      Promise.all([refreshUser(), refreshDogs()]).finally(() => setIsLoading(false));
+      Promise.all([refreshUser(), refreshDogs()]).finally(() =>
+        setIsLoading(false),
+      );
     }
   }, [token, refreshUser, refreshDogs]);
 
@@ -99,14 +115,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
+
     saveToken(response.access_token);
   };
 
-  const register = async (email: string, username: string, password: string) => {
-    const response = await apiClient<{ access_token: string }>("/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ email, username, password }),
-    });
+  const register = async (
+    email: string,
+    username: string,
+    password: string,
+  ) => {
+    const response = await apiClient<{ access_token: string }>(
+      "/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify({ email, username, password }),
+      },
+    );
+
     saveToken(response.access_token);
   };
 
@@ -121,7 +146,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ name, breed }),
       token,
     });
+
     setDogs((prev) => [dog, ...prev]);
+
     return dog;
   };
 
@@ -158,8 +185,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
+
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 }

@@ -41,7 +41,7 @@ type UserData = {
 export default function ProfilPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  
+
   const [userData, setUserData] = useState<UserData | null>(null);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -60,24 +60,36 @@ export default function ProfilPage() {
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
-      
+
       try {
         // Fetch dogs
         const dogsData = await dogsApi.getMyDogs();
-        const mappedDogs: Dog[] = dogsData.map((dog: { id: string; name: string; breed: string; age: number; weight: number }) => ({
-          id: dog.id,
-          name: dog.name,
-          breed: dog.breed || "",
-          age: dog.age || 0,
-          weight: dog.weight || 0,
-          photo: "🐕",
-        }));
+        const mappedDogs: Dog[] = dogsData.map(
+          (dog: {
+            id: string;
+            name: string;
+            breed: string;
+            age: number;
+            weight: number;
+          }) => ({
+            id: dog.id,
+            name: dog.name,
+            breed: dog.breed || "",
+            age: dog.age || 0,
+            weight: dog.weight || 0,
+            photo: "🐕",
+          }),
+        );
+
         setDogs(mappedDogs);
 
         // Fetch friends count
         try {
           const friendsData = await friendsApi.getRequests();
-          const acceptedFriends = friendsData.filter((req: { status: string }) => req.status === "accepted");
+          const acceptedFriends = friendsData.filter(
+            (req: { status: string }) => req.status === "accepted",
+          );
+
           setFriendCount(acceptedFriends.length);
         } catch {
           setFriendCount(0);
@@ -90,14 +102,20 @@ export default function ProfilPage() {
           phone: "",
           location: "Warszawa",
           avatar: user.username[0].toUpperCase(),
-          dog: mappedDogs[0] || { name: "", breed: "", age: 0, weight: 0, photo: "🐕" },
+          dog: mappedDogs[0] || {
+            name: "",
+            breed: "",
+            age: 0,
+            weight: 0,
+            photo: "🐕",
+          },
           stats: {
             walks: 0,
             friends: friendCount,
             parks: 0,
           },
         };
-        
+
         setUserData(newUserData);
         setEditForm(newUserData);
       } catch (error) {
@@ -114,7 +132,7 @@ export default function ProfilPage() {
 
   const handleSave = async () => {
     if (!editForm) return;
-    
+
     try {
       // Update dog if exists
       if (editForm.dog.name) {
@@ -136,22 +154,31 @@ export default function ProfilPage() {
           });
         }
       }
-      
+
       setUserData(editForm);
       setIsEditing(false);
-      
+
       // Refresh dogs data to get updated info from server
       const dogsData = await dogsApi.getMyDogs();
-      const mappedDogs: Dog[] = dogsData.map((dog: { id: string; name: string; breed: string; age: number; weight: number }) => ({
-        id: dog.id,
-        name: dog.name,
-        breed: dog.breed || "",
-        age: dog.age || 0,
-        weight: dog.weight || 0,
-        photo: "🐕",
-      }));
+      const mappedDogs: Dog[] = dogsData.map(
+        (dog: {
+          id: string;
+          name: string;
+          breed: string;
+          age: number;
+          weight: number;
+        }) => ({
+          id: dog.id,
+          name: dog.name,
+          breed: dog.breed || "",
+          age: dog.age || 0,
+          weight: dog.weight || 0,
+          photo: "🐕",
+        }),
+      );
+
       setDogs(mappedDogs);
-      
+
       addToast({
         title: "Sukces",
         description: "Profil został zaktualizowany",
@@ -191,31 +218,33 @@ export default function ProfilPage() {
     <div className="flex flex-col gap-6 max-w-4xl mx-auto pb-8">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
+        initial={{ opacity: 0, y: -20 }}
       >
         <h1 className="text-3xl font-bold text-gradient mb-2">Mój Profil</h1>
-        <p className="text-default-500">Zarządzaj swoimi danymi i profilem psa</p>
+        <p className="text-default-500">
+          Zarządzaj swoimi danymi i profilem psa
+        </p>
       </motion.div>
 
       {/* Profile Card */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
         transition={{ delay: 0.1 }}
       >
         <Card className="border border-default-200 shadow-lg">
           <CardHeader className="relative overflow-hidden pb-0">
             {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 via-orange-400/20 to-amber-500/20" />
-            
+
             <div className="relative flex flex-col sm:flex-row items-center gap-6 p-6 w-full">
               {/* Avatar */}
               <div className="relative">
                 <Avatar
-                  name={userData.avatar}
                   className="w-28 h-28 text-3xl bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-xl"
+                  name={userData.avatar}
                 />
                 <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-default-100 rounded-full flex items-center justify-center shadow-lg text-2xl">
                   {userData.dog.photo}
@@ -231,11 +260,11 @@ export default function ProfilPage() {
                 </div>
                 {userData.dog.name && (
                   <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
-                    <Chip color="primary" variant="flat" size="sm">
+                    <Chip color="primary" size="sm" variant="flat">
                       🐕 {userData.dog.name}
                     </Chip>
                     {userData.dog.breed && (
-                      <Chip color="secondary" variant="flat" size="sm">
+                      <Chip color="secondary" size="sm" variant="flat">
                         {userData.dog.breed}
                       </Chip>
                     )}
@@ -245,10 +274,12 @@ export default function ProfilPage() {
 
               {/* Edit Button */}
               <Button
+                className="absolute top-4 right-4"
                 color={isEditing ? "danger" : "primary"}
                 variant={isEditing ? "flat" : "shadow"}
-                onPress={() => isEditing ? handleCancel() : setIsEditing(true)}
-                className="absolute top-4 right-4"
+                onPress={() =>
+                  isEditing ? handleCancel() : setIsEditing(true)
+                }
               >
                 {isEditing ? "Anuluj" : "Edytuj"}
               </Button>
@@ -259,15 +290,21 @@ export default function ProfilPage() {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center p-4 rounded-xl bg-default-50">
-                <p className="text-3xl font-bold text-primary">{userData.stats.walks}</p>
+                <p className="text-3xl font-bold text-primary">
+                  {userData.stats.walks}
+                </p>
                 <p className="text-sm text-default-500">Spacerów</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-default-50">
-                <p className="text-3xl font-bold text-secondary">{friendCount}</p>
+                <p className="text-3xl font-bold text-secondary">
+                  {friendCount}
+                </p>
                 <p className="text-sm text-default-500">Znajomych</p>
               </div>
               <div className="text-center p-4 rounded-xl bg-default-50">
-                <p className="text-3xl font-bold text-success">{userData.stats.parks}</p>
+                <p className="text-3xl font-bold text-success">
+                  {userData.stats.parks}
+                </p>
                 <p className="text-sm text-default-500">Parków</p>
               </div>
             </div>
@@ -279,36 +316,44 @@ export default function ProfilPage() {
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 👤 Dane użytkownika
               </h3>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
+                  isReadOnly={!isEditing}
                   label="Imię i nazwisko"
                   value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, name: e.target.value })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Email"
                   type="email"
                   value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Telefon"
                   value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, phone: e.target.value })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Lokalizacja"
                   value={editForm.location}
-                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, location: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -318,53 +363,67 @@ export default function ProfilPage() {
             {/* Dog Details */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg flex items-center gap-2">
-                <DogIcon size={20} className="text-amber-500" />
+                <DogIcon className="text-amber-500" size={20} />
                 Profil psa
               </h3>
-              
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
-                  label="Imię psa"
-                  value={editForm.dog.name}
-                  onChange={(e) => setEditForm({ 
-                    ...editForm, 
-                    dog: { ...editForm.dog, name: e.target.value }
-                  })}
                   isReadOnly={!isEditing}
-                  variant={isEditing ? "bordered" : "flat"}
+                  label="Imię psa"
                   startContent={<span>🐕</span>}
+                  value={editForm.dog.name}
+                  variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      dog: { ...editForm.dog, name: e.target.value },
+                    })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Rasa"
                   value={editForm.dog.breed}
-                  onChange={(e) => setEditForm({ 
-                    ...editForm, 
-                    dog: { ...editForm.dog, breed: e.target.value }
-                  })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      dog: { ...editForm.dog, breed: e.target.value },
+                    })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Wiek (lata)"
                   type="number"
                   value={editForm.dog.age.toString()}
-                  onChange={(e) => setEditForm({ 
-                    ...editForm, 
-                    dog: { ...editForm.dog, age: parseInt(e.target.value) || 0 }
-                  })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      dog: {
+                        ...editForm.dog,
+                        age: parseInt(e.target.value) || 0,
+                      },
+                    })
+                  }
                 />
                 <Input
+                  isReadOnly={!isEditing}
                   label="Waga (kg)"
                   type="number"
                   value={editForm.dog.weight.toString()}
-                  onChange={(e) => setEditForm({ 
-                    ...editForm, 
-                    dog: { ...editForm.dog, weight: parseInt(e.target.value) || 0 }
-                  })}
-                  isReadOnly={!isEditing}
                   variant={isEditing ? "bordered" : "flat"}
+                  onChange={(e) =>
+                    setEditForm({
+                      ...editForm,
+                      dog: {
+                        ...editForm.dog,
+                        weight: parseInt(e.target.value) || 0,
+                      },
+                    })
+                  }
                 />
               </div>
             </div>
@@ -372,15 +431,15 @@ export default function ProfilPage() {
             {/* Save Button */}
             {isEditing && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6"
+                initial={{ opacity: 0, y: 10 }}
               >
                 <Button
-                  color="primary"
-                  variant="shadow"
-                  size="lg"
                   className="w-full font-semibold"
+                  color="primary"
+                  size="lg"
+                  variant="shadow"
                   onPress={handleSave}
                 >
                   💾 Zapisz zmiany
@@ -393,27 +452,43 @@ export default function ProfilPage() {
 
       {/* Quick Actions */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
         transition={{ delay: 0.2 }}
       >
         <Card className="border border-default-200">
           <CardBody className="p-4">
             <h3 className="font-semibold mb-4">Szybkie akcje</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Button variant="flat" color="primary" className="h-auto py-4 flex-col gap-2">
+              <Button
+                className="h-auto py-4 flex-col gap-2"
+                color="primary"
+                variant="flat"
+              >
                 <span className="text-2xl">📷</span>
                 <span className="text-xs">Zmień zdjęcie</span>
               </Button>
-              <Button variant="flat" color="secondary" className="h-auto py-4 flex-col gap-2">
+              <Button
+                className="h-auto py-4 flex-col gap-2"
+                color="secondary"
+                variant="flat"
+              >
                 <span className="text-2xl">🔔</span>
                 <span className="text-xs">Powiadomienia</span>
               </Button>
-              <Button variant="flat" color="success" className="h-auto py-4 flex-col gap-2">
+              <Button
+                className="h-auto py-4 flex-col gap-2"
+                color="success"
+                variant="flat"
+              >
                 <span className="text-2xl">🔒</span>
                 <span className="text-xs">Prywatność</span>
               </Button>
-              <Button variant="flat" color="warning" className="h-auto py-4 flex-col gap-2">
+              <Button
+                className="h-auto py-4 flex-col gap-2"
+                color="warning"
+                variant="flat"
+              >
                 <span className="text-2xl">❓</span>
                 <span className="text-xs">Pomoc</span>
               </Button>

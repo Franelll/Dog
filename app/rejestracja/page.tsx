@@ -30,7 +30,7 @@ export default function RejeestracjaPage() {
   // Dog data
   const [dogName, setDogName] = useState("");
   const [dogBreed, setDogBreed] = useState("");
-  
+
   const isRegisteringRef = useRef(false);
 
   // Redirect if already logged in (but not during registration flow)
@@ -46,18 +46,22 @@ export default function RejeestracjaPage() {
 
     if (!username || !email || !password) {
       setError("Wypełnij wszystkie pola");
+
       return;
     }
     if (password !== confirmPassword) {
       setError("Hasła nie są takie same");
+
       return;
     }
     if (password.length < 6) {
       setError("Hasło musi mieć minimum 6 znaków");
+
       return;
     }
     if (!acceptTerms) {
       setError("Musisz zaakceptować regulamin");
+
       return;
     }
 
@@ -98,15 +102,15 @@ export default function RejeestracjaPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
       >
         <Card className="border border-default-200 shadow-xl">
           <CardHeader className="flex flex-col items-center pt-8 pb-0">
             {/* Logo */}
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg mb-4">
-              <DogIcon size={40} className="text-white" />
+              <DogIcon className="text-white" size={40} />
             </div>
             <h1 className="text-2xl font-bold text-gradient">
               {step === 1 ? "Dołącz do Psiarzy!" : "Opowiedz o swoim psie"}
@@ -117,92 +121,101 @@ export default function RejeestracjaPage() {
 
             {/* Progress indicator */}
             <div className="flex gap-2 mt-4">
-              <div className={`w-16 h-1.5 rounded-full ${step >= 1 ? "bg-primary" : "bg-default-200"}`} />
-              <div className={`w-16 h-1.5 rounded-full ${step >= 2 ? "bg-primary" : "bg-default-200"}`} />
+              <div
+                className={`w-16 h-1.5 rounded-full ${step >= 1 ? "bg-primary" : "bg-default-200"}`}
+              />
+              <div
+                className={`w-16 h-1.5 rounded-full ${step >= 2 ? "bg-primary" : "bg-default-200"}`}
+              />
             </div>
           </CardHeader>
 
           <CardBody className="px-8 py-6">
             {error && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="p-3 rounded-lg bg-danger-50 text-danger-600 text-sm text-center mb-4"
+                initial={{ opacity: 0, scale: 0.95 }}
               >
                 {error}
               </motion.div>
             )}
 
             {step === 1 ? (
-              <form onSubmit={handleStep1} className="flex flex-col gap-4">
+              <form className="flex flex-col gap-4" onSubmit={handleStep1}>
                 <Input
+                  isRequired
                   label="Nazwa użytkownika"
                   placeholder="jan_kowalski"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">👤</span>}
-                  isRequired
+                  value={username}
+                  variant="bordered"
+                  onChange={(e) => setUsername(e.target.value)}
                 />
 
                 <Input
-                  type="email"
+                  isRequired
                   label="Email"
                   placeholder="twoj@email.pl"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">📧</span>}
-                  isRequired
+                  type="email"
+                  value={email}
+                  variant="bordered"
+                  onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <Input
-                  type="password"
+                  isRequired
                   label="Hasło"
                   placeholder="Minimum 6 znaków"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">🔒</span>}
-                  isRequired
+                  type="password"
+                  value={password}
+                  variant="bordered"
+                  onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <Input
-                  type="password"
+                  isRequired
                   label="Powtórz hasło"
                   placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">🔒</span>}
-                  isRequired
+                  type="password"
+                  value={confirmPassword}
+                  variant="bordered"
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
 
                 <Checkbox
                   isSelected={acceptTerms}
-                  onValueChange={setAcceptTerms}
                   size="sm"
+                  onValueChange={setAcceptTerms}
                 >
                   <span className="text-sm">
                     Akceptuję{" "}
-                    <Link href="#" size="sm">regulamin</Link> i{" "}
-                    <Link href="#" size="sm">politykę prywatności</Link>
+                    <Link href="#" size="sm">
+                      regulamin
+                    </Link>{" "}
+                    i{" "}
+                    <Link href="#" size="sm">
+                      politykę prywatności
+                    </Link>
                   </span>
                 </Checkbox>
 
                 <Button
-                  type="submit"
-                  color="primary"
-                  size="lg"
-                  radius="full"
                   className="font-semibold mt-2"
+                  color="primary"
                   isLoading={isLoading}
+                  radius="full"
+                  size="lg"
+                  type="submit"
                 >
                   Dalej →
                 </Button>
               </form>
             ) : (
-              <form onSubmit={handleRegister} className="flex flex-col gap-4">
+              <form className="flex flex-col gap-4" onSubmit={handleRegister}>
                 <div className="text-center mb-2">
                   <span className="text-5xl">🐕</span>
                   <p className="text-default-500 text-sm mt-2">
@@ -213,51 +226,49 @@ export default function RejeestracjaPage() {
                 <Input
                   label="Imię psa"
                   placeholder="np. Burek, Luna, Max"
-                  value={dogName}
-                  onChange={(e) => setDogName(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">🐶</span>}
+                  value={dogName}
+                  variant="bordered"
+                  onChange={(e) => setDogName(e.target.value)}
                 />
 
                 <Input
                   label="Rasa"
                   placeholder="np. Labrador, Golden Retriever"
-                  value={dogBreed}
-                  onChange={(e) => setDogBreed(e.target.value)}
-                  variant="bordered"
                   startContent={<span className="text-default-400">🦮</span>}
+                  value={dogBreed}
+                  variant="bordered"
+                  onChange={(e) => setDogBreed(e.target.value)}
                 />
-
-
 
                 <div className="flex gap-3 mt-2">
                   <Button
+                    className="flex-1"
+                    radius="full"
+                    size="lg"
                     type="button"
                     variant="bordered"
-                    size="lg"
-                    radius="full"
-                    className="flex-1"
                     onPress={() => setStep(1)}
                   >
                     ← Wstecz
                   </Button>
                   <Button
-                    type="submit"
-                    color="primary"
-                    size="lg"
-                    radius="full"
                     className="flex-1 font-semibold"
+                    color="primary"
                     isLoading={isLoading}
+                    radius="full"
+                    size="lg"
+                    type="submit"
                   >
                     {isLoading ? "Tworzenie..." : "🐕 Utwórz konto"}
                   </Button>
                 </div>
 
                 <Button
+                  className="text-default-500"
+                  size="sm"
                   type="button"
                   variant="light"
-                  size="sm"
-                  className="text-default-500"
                   onPress={() => router.push("/czaty")}
                 >
                   Pomiń i dokończ później
@@ -270,7 +281,7 @@ export default function RejeestracjaPage() {
             {/* Login Link */}
             <p className="text-center text-sm text-default-500">
               Masz już konto?{" "}
-              <Link href="/login" className="text-primary font-semibold">
+              <Link className="text-primary font-semibold" href="/login">
                 Zaloguj się
               </Link>
             </p>

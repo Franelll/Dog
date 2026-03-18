@@ -10,13 +10,16 @@ function useFixLeafletDefaultIcons() {
       // Fix dla domyślnych ikon Leaflet (w Next często nie znajdują się assety)
       // Guardy żeby nie wywalało całej strony mapy.
       const iconDefault = (L as any)?.Icon?.Default;
+
       if (!iconDefault?.prototype) return;
 
       delete (iconDefault.prototype as any)._getIconUrl;
       iconDefault.mergeOptions({
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        iconRetinaUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
         iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+        shadowUrl:
+          "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
     } catch (e) {
       console.error("Leaflet icon fix failed:", e);
@@ -46,13 +49,13 @@ type LeafletMapProps = {
 // Component to handle map center changes
 function MapCenterHandler({ center }: { center: [number, number] }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (center && !isNaN(center[0]) && !isNaN(center[1])) {
       map.setView(center, map.getZoom());
     }
   }, [center, map]);
-  
+
   return null;
 }
 
@@ -86,7 +89,7 @@ const createUserIcon = () => {
 const createFriendIcon = (name: string, isActive: boolean) => {
   const bgColor = isActive ? "#10B981" : "#6B7280";
   const initial = name.charAt(0).toUpperCase();
-  
+
   return L.divIcon({
     className: "custom-marker",
     html: `
@@ -110,7 +113,9 @@ const createFriendIcon = (name: string, isActive: boolean) => {
           font-size: 14px;
           cursor: pointer;
         ">${initial}</div>
-        ${isActive ? `
+        ${
+          isActive
+            ? `
           <div style="
             position: absolute;
             top: -2px;
@@ -121,7 +126,9 @@ const createFriendIcon = (name: string, isActive: boolean) => {
             border-radius: 50%;
             border: 2px solid white;
           "></div>
-        ` : ""}
+        `
+            : ""
+        }
       </div>
     `,
     iconSize: [36, 36],
@@ -130,86 +137,92 @@ const createFriendIcon = (name: string, isActive: boolean) => {
   });
 };
 
-export default function LeafletMap({ 
-  center, 
-  zoom, 
-  userLocation, 
-  friends, 
+export default function LeafletMap({
+  center,
+  zoom,
+  userLocation,
+  friends,
   onFriendClick,
-  className = "" 
+  className = "",
 }: LeafletMapProps) {
   useFixLeafletDefaultIcons();
 
   const [isReady, setIsReady] = useState(false);
   const [tilesLoaded, setTilesLoaded] = useState(0);
   const [tileErrors, setTileErrors] = useState(0);
-  
+
   return (
-    <div className={`relative w-full ${className}`} style={{ height: "500px", border: "2px solid red" }}>
+    <div
+      className={`relative w-full ${className}`}
+      style={{ height: "500px", border: "2px solid red" }}
+    >
       <div className="pointer-events-none absolute left-2 top-2 z-[1000] rounded-md bg-black/60 px-2 py-1 text-xs text-white">
-        ready: {isReady ? "yes" : "no"} · tiles: {tilesLoaded} · errors: {tileErrors}
+        ready: {isReady ? "yes" : "no"} · tiles: {tilesLoaded} · errors:{" "}
+        {tileErrors}
       </div>
 
       <MapContainer
         center={center}
-        zoom={zoom}
         className="h-full w-full"
-        style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
-        zoomControl={true}
+        style={{ height: "100%", width: "100%" }}
         whenReady={() => setIsReady(true)}
+        zoom={zoom}
+        zoomControl={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           eventHandlers={{
             tileload: () => setTilesLoaded((v) => v + 1),
             tileerror: () => setTileErrors((v) => v + 1),
           }}
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      
-      <MapCenterHandler center={center} />
-      
-      {/* User location marker */}
-      {userLocation && (
-        <Marker position={userLocation} icon={createUserIcon()}>
-          <Popup>
-            <div className="text-center">
-              <b>Twoja lokalizacja</b>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-      
-      {/* Friend markers */}
-      {friends
-        .filter(f => typeof f.lat === 'number' && typeof f.lng === 'number')
-        .map((friend) => (
-        <Marker
-          key={friend.id}
-          position={[friend.lat, friend.lng]}
-          icon={createFriendIcon(friend.name, friend.isActive)}
-          eventHandlers={{
-            click: () => {
-              if (onFriendClick) onFriendClick(friend.id);
-            },
-          }}
-        >
-          <Popup>
-            <div className="text-center min-w-[120px]">
-              <b>{friend.name}</b>
-              <br />
-              <span className="text-gray-600">🐕 {friend.dog}</span>
-              {friend.status && (
-                <>
+
+        <MapCenterHandler center={center} />
+
+        {/* User location marker */}
+        {userLocation && (
+          <Marker icon={createUserIcon()} position={userLocation}>
+            <Popup>
+              <div className="text-center">
+                <b>Twoja lokalizacja</b>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Friend markers */}
+        {friends
+          .filter((f) => typeof f.lat === "number" && typeof f.lng === "number")
+          .map((friend) => (
+            <Marker
+              key={friend.id}
+              eventHandlers={{
+                click: () => {
+                  if (onFriendClick) onFriendClick(friend.id);
+                },
+              }}
+              icon={createFriendIcon(friend.name, friend.isActive)}
+              position={[friend.lat, friend.lng]}
+            >
+              <Popup>
+                <div className="text-center min-w-[120px]">
+                  <b>{friend.name}</b>
                   <br />
-                  <span className="text-emerald-600 text-sm">📢 {friend.status}</span>
-                </>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+                  <span className="text-gray-600">🐕 {friend.dog}</span>
+                  {friend.status && (
+                    <>
+                      <br />
+                      <span className="text-emerald-600 text-sm">
+                        📢 {friend.status}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
       </MapContainer>
     </div>
   );

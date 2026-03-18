@@ -2,7 +2,8 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Psiarze",
-  description: "Aplikacja dla właścicieli psów - umów się na spacer ze znajomymi!",
+  description:
+    "Aplikacja dla właścicieli psów - umów się na spacer ze znajomymi!",
   navItems: [
     {
       label: "Start",

@@ -35,6 +35,7 @@ export default function LoginPage() {
 
     if (!email || !password) {
       setError("Wprowadź email i hasło");
+
       return;
     }
 
@@ -53,74 +54,78 @@ export default function LoginPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
       >
         <Card className="border border-default-200 shadow-xl">
           <CardHeader className="flex flex-col items-center pt-8 pb-0">
             {/* Logo */}
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg mb-4">
-              <DogIcon size={40} className="text-white" />
+              <DogIcon className="text-white" size={40} />
             </div>
-            <h1 className="text-2xl font-bold text-gradient">Witaj ponownie!</h1>
-            <p className="text-default-500 text-sm mt-1">Zaloguj się do swojego konta</p>
+            <h1 className="text-2xl font-bold text-gradient">
+              Witaj ponownie!
+            </h1>
+            <p className="text-default-500 text-sm mt-1">
+              Zaloguj się do swojego konta
+            </p>
           </CardHeader>
 
           <CardBody className="px-8 py-6">
-            <form onSubmit={handleLogin} className="flex flex-col gap-4">
+            <form className="flex flex-col gap-4" onSubmit={handleLogin}>
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="p-3 rounded-lg bg-danger-50 text-danger-600 text-sm text-center"
+                  initial={{ opacity: 0, scale: 0.95 }}
                 >
                   {error}
                 </motion.div>
               )}
 
               <Input
-                type="email"
+                isRequired
                 label="Email"
                 placeholder="twoj@email.pl"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                variant="bordered"
                 startContent={<span className="text-default-400">📧</span>}
-                isRequired
+                type="email"
+                value={email}
+                variant="bordered"
+                onChange={(e) => setEmail(e.target.value)}
               />
 
               <Input
-                type="password"
+                isRequired
                 label="Hasło"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                variant="bordered"
                 startContent={<span className="text-default-400">🔒</span>}
-                isRequired
+                type="password"
+                value={password}
+                variant="bordered"
+                onChange={(e) => setPassword(e.target.value)}
               />
 
               <div className="flex justify-between items-center">
                 <Checkbox
                   isSelected={rememberMe}
-                  onValueChange={setRememberMe}
                   size="sm"
+                  onValueChange={setRememberMe}
                 >
                   Zapamiętaj mnie
                 </Checkbox>
-                <Link href="#" size="sm" className="text-primary">
+                <Link className="text-primary" href="#" size="sm">
                   Zapomniałeś hasła?
                 </Link>
               </div>
 
               <Button
-                type="submit"
-                color="primary"
-                size="lg"
-                radius="full"
                 className="font-semibold mt-2"
+                color="primary"
                 isLoading={isLoading}
+                radius="full"
+                size="lg"
+                type="submit"
               >
                 {isLoading ? "Logowanie..." : "🐕 Zaloguj się"}
               </Button>
@@ -130,12 +135,22 @@ export default function LoginPage() {
 
             {/* Social Login */}
             <div className="flex flex-col gap-3">
-              <p className="text-center text-sm text-default-500 mb-2">Lub kontynuuj przez</p>
+              <p className="text-center text-sm text-default-500 mb-2">
+                Lub kontynuuj przez
+              </p>
               <div className="flex gap-3">
-                <Button variant="bordered" className="flex-1" startContent={<span>🔵</span>}>
+                <Button
+                  className="flex-1"
+                  startContent={<span>🔵</span>}
+                  variant="bordered"
+                >
                   Google
                 </Button>
-                <Button variant="bordered" className="flex-1" startContent={<span>📘</span>}>
+                <Button
+                  className="flex-1"
+                  startContent={<span>📘</span>}
+                  variant="bordered"
+                >
                   Facebook
                 </Button>
               </div>
@@ -146,7 +161,7 @@ export default function LoginPage() {
             {/* Register Link */}
             <p className="text-center text-sm text-default-500">
               Nie masz konta?{" "}
-              <Link href="/rejestracja" className="text-primary font-semibold">
+              <Link className="text-primary font-semibold" href="/rejestracja">
                 Zarejestruj się
               </Link>
             </p>
