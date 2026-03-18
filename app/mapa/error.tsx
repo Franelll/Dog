@@ -23,12 +23,14 @@ export default function MapaError({
         <CardBody className="p-6 flex flex-col gap-4">
           <div>
             <p className="font-semibold text-lg">Coś poszło nie tak z mapą</p>
-            <p className="text-sm text-default-600">Poniżej jest konkretny błąd (pomaga naprawić problem).</p>
+            <p className="text-sm text-default-600">
+              Poniżej jest konkretny błąd (pomaga naprawić problem).
+            </p>
           </div>
 
           <pre className="text-xs bg-background/60 rounded-lg p-3 overflow-auto border border-default-200">
-{error?.message}
-{error?.digest ? `\n\nDigest: ${error.digest}` : ""}
+            {error?.message}
+            {error?.digest ? `\n\nDigest: ${error.digest}` : ""}
           </pre>
 
           <div className="flex gap-2">

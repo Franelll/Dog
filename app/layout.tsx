@@ -37,11 +37,11 @@ export default function RootLayout({
   return (
     <html suppressHydrationWarning lang="pl">
       <head>
-        <link 
-          rel="stylesheet" 
+        <link
+          crossOrigin=""
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-          crossOrigin=""
+          rel="stylesheet"
         />
       </head>
       <body
@@ -63,13 +63,15 @@ export default function RootLayout({
                   <div className="md:col-span-2">
                     <div className="flex items-center gap-2 mb-4">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
-                        <DogIcon size={24} className="text-white" />
+                        <DogIcon className="text-white" size={24} />
                       </div>
-                      <span className="font-bold text-xl text-gradient">Psiarze</span>
+                      <span className="font-bold text-xl text-gradient">
+                        Psiarze
+                      </span>
                     </div>
                     <p className="text-default-500 text-sm max-w-xs">
-                      Aplikacja dla właścicieli psów. Umów się na spacer ze znajomymi 
-                      i nigdy nie spaceruj sam!
+                      Aplikacja dla właścicieli psów. Umów się na spacer ze
+                      znajomymi i nigdy nie spaceruj sam!
                     </p>
                     <div className="flex gap-2 mt-4">
                       <span className="text-2xl">🐕</span>
@@ -83,10 +85,26 @@ export default function RootLayout({
                   <div>
                     <h4 className="font-semibold mb-4">Nawigacja</h4>
                     <ul className="space-y-2 text-sm text-default-500">
-                      <li><Link href="/" className="hover:text-primary">Strona główna</Link></li>
-                      <li><Link href="/psiarze" className="hover:text-primary">Aplikacja</Link></li>
-                      <li><Link href="/about" className="hover:text-primary">O nas</Link></li>
-                      <li><Link href="/blog" className="hover:text-primary">Blog</Link></li>
+                      <li>
+                        <Link className="hover:text-primary" href="/">
+                          Strona główna
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="hover:text-primary" href="/psiarze">
+                          Aplikacja
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="hover:text-primary" href="/about">
+                          O nas
+                        </Link>
+                      </li>
+                      <li>
+                        <Link className="hover:text-primary" href="/blog">
+                          Blog
+                        </Link>
+                      </li>
                     </ul>
                   </div>
 

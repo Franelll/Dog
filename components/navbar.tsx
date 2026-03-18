@@ -12,7 +12,12 @@ import {
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { Avatar } from "@heroui/avatar";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from "@heroui/dropdown";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+} from "@heroui/dropdown";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
@@ -36,19 +41,22 @@ export const Navbar = () => {
   const displayName = user?.username || "Gość";
 
   return (
-    <HeroUINavbar 
-      maxWidth="xl" 
-      position="sticky"
+    <HeroUINavbar
       classNames={{
         base: "bg-background/70 backdrop-blur-lg border-b border-default-100",
         wrapper: "px-4 sm:px-6",
       }}
+      maxWidth="xl"
+      position="sticky"
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
-          <NextLink className="flex justify-start items-center gap-2 group" href="/">
+          <NextLink
+            className="flex justify-start items-center gap-2 group"
+            href="/"
+          >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all">
-              <DogIcon size={24} className="text-white" />
+              <DogIcon className="text-white" size={24} />
             </div>
             <p className="font-bold text-xl text-gradient">Psiarze</p>
           </NextLink>
@@ -78,7 +86,7 @@ export const Navbar = () => {
       >
         <NavbarItem className="hidden sm:flex gap-3 items-center">
           <ThemeSwitch />
-          
+
           {isAuthenticated ? (
             /* Profile Dropdown */
             <Dropdown placement="bottom-end">
@@ -95,20 +103,35 @@ export const Navbar = () => {
                   <p className="font-semibold">Zalogowany jako</p>
                   <p className="font-semibold text-primary">{displayName}</p>
                 </DropdownItem>
-                <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+                <DropdownItem
+                  key="my_profile"
+                  as={NextLink}
+                  href="/profil"
+                  textValue="Mój profil"
+                >
                   🐕 Mój profil
                 </DropdownItem>
-                <DropdownItem key="logout" color="danger" textValue="Wyloguj" onPress={handleLogout}>
+                <DropdownItem
+                  key="logout"
+                  color="danger"
+                  textValue="Wyloguj"
+                  onPress={handleLogout}
+                >
                   🚪 Wyloguj się
                 </DropdownItem>
               </DropdownMenu>
             </Dropdown>
           ) : (
             <div className="flex gap-2">
-              <Button as={NextLink} href="/login" variant="flat" size="sm">
+              <Button as={NextLink} href="/login" size="sm" variant="flat">
                 Zaloguj
               </Button>
-              <Button as={NextLink} href="/rejestracja" color="primary" size="sm">
+              <Button
+                as={NextLink}
+                color="primary"
+                href="/rejestracja"
+                size="sm"
+              >
                 Rejestracja
               </Button>
             </div>
@@ -129,20 +152,34 @@ export const Navbar = () => {
               />
             </DropdownTrigger>
             <DropdownMenu aria-label="Profile Actions" variant="flat">
-              <DropdownItem key="profile" className="h-14 gap-2" textValue={`Signed in as ${displayName}`}>
+              <DropdownItem
+                key="profile"
+                className="h-14 gap-2"
+                textValue={`Signed in as ${displayName}`}
+              >
                 <p className="font-semibold">Zalogowany jako</p>
                 <p className="font-semibold text-primary">{displayName}</p>
               </DropdownItem>
-              <DropdownItem key="my_profile" as={NextLink} href="/profil" textValue="Mój profil">
+              <DropdownItem
+                key="my_profile"
+                as={NextLink}
+                href="/profil"
+                textValue="Mój profil"
+              >
                 🐕 Mój profil
               </DropdownItem>
-              <DropdownItem key="logout" color="danger" textValue="Wyloguj" onPress={handleLogout}>
+              <DropdownItem
+                key="logout"
+                color="danger"
+                textValue="Wyloguj"
+                onPress={handleLogout}
+              >
                 🚪 Wyloguj się
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         ) : (
-          <Button as={NextLink} href="/login" variant="flat" size="sm">
+          <Button as={NextLink} href="/login" size="sm" variant="flat">
             Zaloguj
           </Button>
         )}
@@ -154,14 +191,10 @@ export const Navbar = () => {
           {siteConfig.navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item.label}-${index}`}>
               <Link
-                color={
-                  item.label === "Mój Profil"
-                    ? "primary"
-                    : "foreground"
-                }
+                className="w-full py-2 flex items-center gap-2"
+                color={item.label === "Mój Profil" ? "primary" : "foreground"}
                 href={item.href}
                 size="lg"
-                className="w-full py-2 flex items-center gap-2"
               >
                 <span>{item.icon}</span>
                 <span>{item.label}</span>

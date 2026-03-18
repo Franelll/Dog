@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiClient } from "@/lib/api";
 
 const DEFAULT_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://psiarze-backend.onrender.com/api";
@@ -26,17 +25,18 @@ export default function TestConnectionPage() {
       // Bierzemy URL z inputa lub domyślnego (wartość env jest wstrzykiwana przy buildzie)
       const apiUrl = urlOverride || DEFAULT_API_URL;
       // Usuwamy /api z końca, jeśli jest, żeby dostać się do /health
-      const baseUrl = apiUrl.replace(/\/api\/?$/, ""); 
-      
+      const baseUrl = apiUrl.replace(/\/api\/?$/, "");
+
       console.log("Testing connection to:", `${baseUrl}/health`);
 
       const response = await fetch(`${baseUrl}/health`);
-      
+
       if (!response.ok) {
-          throw new Error(`Błąd HTTP: ${response.status} ${response.statusText}`);
+        throw new Error(`Błąd HTTP: ${response.status} ${response.statusText}`);
       }
 
       const result = await response.json();
+
       setStatus("Połączono z backendem!");
       setData(result);
     } catch (err: any) {
@@ -49,42 +49,53 @@ export default function TestConnectionPage() {
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Test Połączenia z Backendem</h1>
-      
+
       <div className="mb-6 p-4 bg-gray-50 rounded border">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-2"
+          htmlFor="api-url"
+        >
           Adres API (możesz edytować):
         </label>
         <div className="flex gap-2">
-          <input 
-            type="text" 
+          <input
+            className="flex-1 p-2 border rounded"
+            id="api-url"
+            placeholder="https://..."
+            type="text"
             value={manualUrl}
             onChange={(e) => setManualUrl(e.target.value)}
-            className="flex-1 p-2 border rounded"
-            placeholder="https://..."
           />
-          <button 
-            onClick={() => checkConnection(manualUrl)}
+          <button
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            onClick={() => checkConnection(manualUrl)}
           >
             Sprawdź
           </button>
         </div>
       </div>
 
-      <div className={`p-4 rounded-lg border ${error ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
-        <p className={`text-lg font-semibold ${error ? 'text-red-700' : 'text-green-700'}`}>
+      <div
+        className={`p-4 rounded-lg border ${error ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}
+      >
+        <p
+          className={`text-lg font-semibold ${error ? "text-red-700" : "text-green-700"}`}
+        >
           Status: {status}
         </p>
-        
+
         {error && (
           <div className="mt-2 text-red-600">
             <p>Szczegóły błędu: {error}</p>
             <div className="text-sm mt-2 text-gray-600">
               Upewnij się, że:
               <ul className="list-disc ml-5 mt-1">
-                <li>Backend na Renderze jest "Live"</li>
+                <li>Backend na Renderze jest &quot;Live&quot;</li>
                 <li>Adres w .env.local jest poprawny (musi być https)</li>
-                <li>Zrestartowałeś serwer frontendowy (npm run dev) po zmianie .env.local</li>
+                <li>
+                  Zrestartowałeś serwer frontendowy (npm run dev) po zmianie
+                  .env.local
+                </li>
               </ul>
             </div>
           </div>
@@ -99,14 +110,18 @@ export default function TestConnectionPage() {
           </div>
         )}
       </div>
-      
+
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Konfiguracja:</h2>
         <p className="text-gray-600">
-          API URL: <code className="bg-gray-100 px-2 py-1 rounded">{manualUrl}</code>
+          API URL:{" "}
+          <code className="bg-gray-100 px-2 py-1 rounded">{manualUrl}</code>
         </p>
         <p className="text-gray-500 text-xs mt-1">
-          Raw Env: {process.env.NEXT_PUBLIC_API_URL ? `"${process.env.NEXT_PUBLIC_API_URL}"` : "(undefined/empty)"}
+          Raw Env:{" "}
+          {process.env.NEXT_PUBLIC_API_URL
+            ? `"${process.env.NEXT_PUBLIC_API_URL}"`
+            : "(undefined/empty)"}
         </p>
       </div>
     </div>

@@ -58,25 +58,38 @@ function MapaPageContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [friends, setFriends] = useState<Friend[]>([]);
-  const [myLocation, setMyLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [myLocation, setMyLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
-  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({ lat: 52.2297, lng: 21.0122 });
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
+    lat: 52.2297,
+    lng: 21.0122,
+  });
   const [loading, setLoading] = useState(true);
   const [sharingLocation, setSharingLocation] = useState(false);
-  const [previousFriendLocations, setPreviousFriendLocations] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+  const [previousFriendLocations, setPreviousFriendLocations] = useState<
+    Map<string, { lat: number; lng: number }>
+  >(new Map());
 
   // Calculate distance between two points in meters
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number => {
     const R = 6371e3; // Earth's radius in meters
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
     const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // Distance in meters
@@ -95,6 +108,7 @@ function MapaPageContent() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+
           setMyLocation(loc);
           setMapCenter(loc);
           setLocationDenied(false);
@@ -103,7 +117,7 @@ function MapaPageContent() {
           // User denied location or error occurred
           setLocationDenied(true);
           setMyLocation(null);
-        }
+        },
       );
     } else {
       setLocationDenied(true);
@@ -114,34 +128,58 @@ function MapaPageContent() {
   useEffect(() => {
     const fetchLocations = async () => {
       if (!isAuthenticated) return;
-      
+
       try {
         const data = await locationsApi.getFriendsLocations();
-        const mappedFriends: Friend[] = data.map((loc: { user_id: string; username: string; latitude: number; longitude: number; is_active: boolean }, index: number) => ({
-          id: loc.user_id.toString(),
-          name: loc.username,
-          dog: "",
-          breed: "",
-          avatar: loc.username[0].toUpperCase(),
-          status: loc.is_active ? "Aktywny" : null,
-          color: COLORS[index % COLORS.length],
-          lat: loc.latitude,
-          lng: loc.longitude,
-        }));
+        const mappedFriends: Friend[] = data.map(
+          (
+            loc: {
+              user_id: string;
+              username: string;
+              latitude: number;
+              longitude: number;
+              is_active: boolean;
+            },
+            index: number,
+          ) => ({
+            id: loc.user_id.toString(),
+            name: loc.username,
+            dog: "",
+            breed: "",
+            avatar: loc.username[0].toUpperCase(),
+            status: loc.is_active ? "Aktywny" : null,
+            color: COLORS[index % COLORS.length],
+            lat: loc.latitude,
+            lng: loc.longitude,
+          }),
+        );
+
         setFriends(mappedFriends);
-        
+
         // Check for nearby dogs
         if (myLocation) {
-          mappedFriends.forEach(friend => {
-            if (friend.status) { // Only active friends
-              const distance = calculateDistance(myLocation.lat, myLocation.lng, friend.lat, friend.lng);
+          mappedFriends.forEach((friend) => {
+            if (friend.status) {
+              // Only active friends
+              const distance = calculateDistance(
+                myLocation.lat,
+                myLocation.lng,
+                friend.lat,
+                friend.lng,
+              );
               const previousLocation = previousFriendLocations.get(friend.id);
-              
+
               // Notify if friend is within 50 meters and wasn't before
               if (distance <= 50) {
-                const wasNearby = previousLocation ? 
-                  calculateDistance(myLocation.lat, myLocation.lng, previousLocation.lat, previousLocation.lng) <= 50 : false;
-                
+                const wasNearby = previousLocation
+                  ? calculateDistance(
+                      myLocation.lat,
+                      myLocation.lng,
+                      previousLocation.lat,
+                      previousLocation.lng,
+                    ) <= 50
+                  : false;
+
                 if (!wasNearby) {
                   addToast({
                     title: "🐕 Pies w pobliżu!",
@@ -152,10 +190,11 @@ function MapaPageContent() {
               }
             }
           });
-          
+
           // Update previous locations
           const newLocations = new Map();
-          mappedFriends.forEach(friend => {
+
+          mappedFriends.forEach((friend) => {
             newLocations.set(friend.id, { lat: friend.lat, lng: friend.lng });
           });
           setPreviousFriendLocations(newLocations);
@@ -176,6 +215,7 @@ function MapaPageContent() {
   useEffect(() => {
     if (friendIdFromUrl) {
       const friend = friends.find((f) => f.id === friendIdFromUrl);
+
       if (friend) {
         setSelectedFriend(friend);
         setMapCenter({ lat: friend.lat, lng: friend.lng });
@@ -213,7 +253,7 @@ function MapaPageContent() {
 
   const handleShareLocation = async () => {
     if (!myLocation) return;
-    
+
     setSharingLocation(true);
     try {
       await locationsApi.updateMyLocation(myLocation.lat, myLocation.lng);
@@ -248,23 +288,25 @@ function MapaPageContent() {
       <div className="flex flex-col gap-6 pb-8">
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4"
+          initial={{ opacity: 0, y: -20 }}
         >
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
-            <MapPinIcon size={28} className="text-white" />
+            <MapPinIcon className="text-white" size={28} />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gradient">Mapa</h1>
-            <p className="text-default-500">Włącz lokalizację, aby zobaczyć mapę</p>
+            <p className="text-default-500">
+              Włącz lokalizację, aby zobaczyć mapę
+            </p>
           </div>
         </motion.div>
 
         {/* Location Required Message */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.1 }}
         >
           <Card className="border border-default-200">
@@ -274,17 +316,22 @@ function MapaPageContent() {
               </div>
               <h2 className="text-2xl font-bold mb-2">Lokalizacja wyłączona</h2>
               <p className="text-default-500 max-w-md mx-auto mb-6">
-                Aby korzystać z mapy i widzieć znajomych w okolicy, musisz włączyć udostępnianie lokalizacji w przeglądarce.
+                Aby korzystać z mapy i widzieć znajomych w okolicy, musisz
+                włączyć udostępnianie lokalizacji w przeglądarce.
               </p>
-              <Button 
-                color="primary" 
+              <Button
+                color="primary"
                 size="lg"
                 onPress={() => {
                   // Try to request location again
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       (pos) => {
-                        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                        const loc = {
+                          lat: pos.coords.latitude,
+                          lng: pos.coords.longitude,
+                        };
+
                         setMyLocation(loc);
                         setMapCenter(loc);
                         setLocationDenied(false);
@@ -292,10 +339,11 @@ function MapaPageContent() {
                       () => {
                         addToast({
                           title: "Błąd",
-                          description: "Nie można uzyskać lokalizacji. Sprawdź ustawienia przeglądarki.",
+                          description:
+                            "Nie można uzyskać lokalizacji. Sprawdź ustawienia przeglądarki.",
                           color: "danger",
                         });
-                      }
+                      },
                     );
                   }
                 }}
@@ -303,7 +351,8 @@ function MapaPageContent() {
                 Włącz lokalizację
               </Button>
               <p className="text-xs text-default-400 mt-4">
-                Wskazówka: Kliknij ikonę kłódki/lokalizacji w pasku adresu przeglądarki
+                Wskazówka: Kliknij ikonę kłódki/lokalizacji w pasku adresu
+                przeglądarki
               </p>
             </CardBody>
           </Card>
@@ -316,28 +365,35 @@ function MapaPageContent() {
     <div className="flex flex-col gap-6 pb-8">
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, y: -20 }}
       >
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
-            <MapPinIcon size={28} className="text-white" />
+            <MapPinIcon className="text-white" size={28} />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gradient">Mapa</h1>
-            <p className="text-default-500">{activeFriends.length} znajomych w okolicy</p>
+            <p className="text-default-500">
+              {activeFriends.length} znajomych w okolicy
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button color="default" variant="flat" startContent={<span>🎯</span>} onPress={handleCenterOnMe}>
+          <Button
+            color="default"
+            startContent={<span>🎯</span>}
+            variant="flat"
+            onPress={handleCenterOnMe}
+          >
             Moja lokalizacja
           </Button>
-          <Button 
-            color="primary" 
-            variant="shadow" 
-            startContent={<span>📍</span>}
+          <Button
+            color="primary"
             isLoading={sharingLocation}
+            startContent={<span>📍</span>}
+            variant="shadow"
             onPress={handleShareLocation}
           >
             Udostępnij lokalizację
@@ -348,20 +404,23 @@ function MapaPageContent() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Main Map */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
           className="lg:col-span-3"
+          initial={{ opacity: 0, y: 20 }}
+          transition={{ delay: 0.1 }}
         >
           <Card className="border border-default-200 overflow-hidden">
             <CardBody className="p-0">
               <LeafletMap
                 center={[mapCenter.lat, mapCenter.lng]}
-                zoom={14}
-                userLocation={myLocation ? [myLocation.lat, myLocation.lng] : undefined}
                 friends={mapFriends}
+                userLocation={
+                  myLocation ? [myLocation.lat, myLocation.lng] : undefined
+                }
+                zoom={14}
                 onFriendClick={(id) => {
                   const friend = friends.find((f) => f.id === id);
+
                   if (friend) handleFriendSelect(friend);
                 }}
               />
@@ -387,10 +446,10 @@ function MapaPageContent() {
 
         {/* Sidebar */}
         <motion.div
-          initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
           className="lg:col-span-1 space-y-4"
+          initial={{ opacity: 0, x: 20 }}
+          transition={{ delay: 0.2 }}
         >
           {/* Active Friends */}
           <Card className="border border-default-200">
@@ -404,61 +463,88 @@ function MapaPageContent() {
                   {activeFriends.map((friend) => (
                     <Button
                       key={friend.id}
-                      variant={selectedFriend?.id === friend.id ? "flat" : "light"}
-                      color={selectedFriend?.id === friend.id ? "primary" : "default"}
                       className="w-full h-auto py-2 justify-start"
+                      color={
+                        selectedFriend?.id === friend.id ? "primary" : "default"
+                      }
+                      variant={
+                        selectedFriend?.id === friend.id ? "flat" : "light"
+                      }
                       onPress={() => handleFriendSelect(friend)}
                     >
                       <div className="flex items-center gap-3">
-                        <Avatar name={friend.avatar} size="sm" className={`${friend.color} text-white`} />
+                        <Avatar
+                          className={`${friend.color} text-white`}
+                          name={friend.avatar}
+                          size="sm"
+                        />
                         <div className="text-left">
                           <p className="font-medium text-sm">{friend.name}</p>
-                          <p className="text-xs text-default-500 truncate max-w-[120px]">{friend.status}</p>
+                          <p className="text-xs text-default-500 truncate max-w-[120px]">
+                            {friend.status}
+                          </p>
                         </div>
                       </div>
                     </Button>
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-default-500 text-center py-4">Brak aktywnych znajomych</p>
+                <p className="text-sm text-default-500 text-center py-4">
+                  Brak aktywnych znajomych
+                </p>
               )}
             </CardBody>
           </Card>
 
           {/* Selected Friend Details */}
           {selectedFriend && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <motion.div
+              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+            >
               <Card className="border-2 border-primary">
                 <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10">
                   <div className="flex items-center gap-3">
-                    <Avatar name={selectedFriend.avatar} className={`${selectedFriend.color} text-white`} />
+                    <Avatar
+                      className={`${selectedFriend.color} text-white`}
+                      name={selectedFriend.avatar}
+                    />
                     <div>
                       <p className="font-semibold">{selectedFriend.name}</p>
-                      <p className="text-sm text-default-500">🐕 {selectedFriend.dog}</p>
+                      <p className="text-sm text-default-500">
+                        🐕 {selectedFriend.dog}
+                      </p>
                     </div>
                   </div>
                 </CardHeader>
                 <Divider />
                 <CardBody>
-                  <p className="text-sm text-default-600 mb-3">{selectedFriend.breed}</p>
+                  <p className="text-sm text-default-600 mb-3">
+                    {selectedFriend.breed}
+                  </p>
                   {selectedFriend.status && (
-                    <Chip color="success" variant="flat" className="mb-3">
+                    <Chip className="mb-3" color="success" variant="flat">
                       📢 {selectedFriend.status}
                     </Chip>
                   )}
                   <div className="flex gap-2">
-                    <Button size="sm" color="primary" className="flex-1" onPress={() => handleWriteMessage(selectedFriend)}>
+                    <Button
+                      className="flex-1"
+                      color="primary"
+                      size="sm"
+                      onPress={() => handleWriteMessage(selectedFriend)}
+                    >
                       💬 Napisz
                     </Button>
                     <Button
+                      className="flex-1"
                       size="sm"
                       variant="bordered"
-                      className="flex-1"
                       onPress={() => {
                         // Open in Google Maps for navigation
                         window.open(
                           `https://www.google.com/maps/dir/?api=1&destination=${selectedFriend.lat},${selectedFriend.lng}`,
-                          "_blank"
+                          "_blank",
                         );
                       }}
                     >
